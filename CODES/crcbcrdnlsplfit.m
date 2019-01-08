@@ -1,12 +1,11 @@
-function outStruct = crcbcrdnlsplfit(inParams,varargin)
+function outStruct = crcbcrdnlsplfit(dataX,dataY,nIntBrks)
 % Spline fit with cardinal B-Splines
-% O = CRCBCRDNSPLFIT(P)
-% Fit data with a linear combination of cardinal B-splines. P is a struct
-% with the following fields.
-%  'dataY' : The data vector
-%  'dataX' : The time stamps of the data vector
-%  'nIntBrks' : The number of uniformly spaced *interior* breakpoints (there
-%            will always be two breakpoints at dataX(1) and dataX(end).
+% O = CRCBCRDNSPLFIT(X,Y,N)
+% Fit data with a linear combination of cardinal B-splines. Y is The data
+% vector X is The time stamps of the data vector (i.e. the values of the
+% independent variable). N The number of uniformly spaced *interior*
+% breakpoints to use for the fit (there will always be two breakpoints at
+% dataX(1) and dataX(end). 
 % The output is a struct O with the following fields.
 %  'estSig' : The estimated signal
 %  'fitVal' : The fitness value (norm of the residual)
@@ -15,10 +14,6 @@ function outStruct = crcbcrdnlsplfit(inParams,varargin)
 
 
 %Soumya D. Mohanty, May 2018
-
-nIntBrks = inParams.nIntBrks;
-dataX = inParams.dataX;
-dataY = inParams.dataY;
 
 nSamples = length(dataX);
 smplIntrvl = dataX(2) - dataX(1);

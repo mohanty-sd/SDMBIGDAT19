@@ -18,12 +18,8 @@ rng('default')
 dataX = (0:(nSamples-1))/Fs;
 [dataY, sig] = crcbgenbspldata(dataX,snr,sigBrkPts);
 
-%Input parameters
-inParams = struct('dataX', dataX,...
-                  'dataY', dataY,...
-                  'nIntBrks',nIntBrks);
                   
-outStruct = crcbcrdnlsplfit(inParams);
+outStruct = crcbcrdnlsplfit(dataX,dataY,nIntBrks);
 
 %%
 % Plots
