@@ -1,4 +1,4 @@
-%% Test REGSPLINEPSO
+%% Minimize the fitness function CRCBREGSPLFITFUNC using PSO
 % Generate a data realization with:
 % Number of samples
 nSamples = 512;
