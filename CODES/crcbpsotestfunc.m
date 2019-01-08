@@ -1,24 +1,17 @@
-function [fitVal,varargout] = crcbpsotestfunc(xVec,varargin)
+function [fitVal,varargout] = crcbpsotestfunc(xVec,params)
 %A benchmark test function for CRCBPSO
-%F = CRCBPSOTESTFUNC(X)
-%Compute the Rastrigin fitness function for
-%each row of X.  The fitness values are returned in F.
-%
 %F = CRCBPSOTESTFUNC(X,P)
-%is used for the case when X is standardized, that is 0<=X(i,j)<=1. 
-%If the struct P is set to '[]', default array of minimum and
-%maximum ('rmin' and 'rmax' respectively) values are used to convert X(i,j)
-%internally before computing fitness: 
-%X(:,j) -> X(:,j)*(rmax(j)-rmin(j))+rmin(j).
-%Otherwise, supply the arrays as P.rmin and P.rmax. (The default values are
-%[rmin(j),rmax(j)]=[-1.28,1.28].
+%Compute the Rastrigin fitness function for each row of X.  The fitness
+%values are returned in F. X is standardized, that is 0<=X(i,j)<=1. P has
+%two arrays P.rmin and P.rmax that are used to convert X(i,j) internally to
+%actual coordinate values before computing fitness: X(:,j) ->
+%X(:,j)*(rmax(j)-rmin(j))+rmin(j). 
 %
 %For standardized coordinates, F = infty if a point X(i,:) falls
 %outside the hypercube defined by 0<=X(i,j)<=1.
 %
 %[F,R] =  CRCBPSOTESTFUNC(X,P)
-%returns the real coordinates in R. (They are the same as X if P is
-%absent.)
+%returns the real coordinates in R. 
 %
 %[F,R,Xp] = CRCBPSOTESTFUNC(X,P)
 %Returns the standardized coordinates in Xp. This option is to be used when
@@ -54,22 +47,13 @@ function [fitVal,varargout] = crcbpsotestfunc(xVec,varargin)
 fitVal = zeros(nrows,1);
 validPts = ones(nrows,1);
 
-if nargin > 1
-    %Expect standardized coordinates
-    params = varargin{1};
-    %Check for out of bound coordinates and flag them
-    validPts = crcbchkstdsrchrng(xVec);
-    %Set fitness for invalid points to infty
-    fitVal(~validPts)=inf;
-    if isempty(params)
-        %use default range of coordinates
-        %(only the numerical values below should be changed for different
-        %fitness functions)
-        xVec(validPts,:) = s2rsc(xVec(validPts,:),-1.28,1.28);
-    else
-        xVec(validPts,:) = s2rv(xVec(validPts,:),params);
-    end
-end
+%Check for out of bound coordinates and flag them
+validPts = crcbchkstdsrchrng(xVec);
+%Set fitness for invalid points to infty
+fitVal(~validPts)=inf;
+%Convert valid points to actual locations
+xVec(validPts,:) = s2rv(xVec(validPts,:),params);
+
 
 for lpc = 1:nrows
     if validPts(lpc)
@@ -84,11 +68,7 @@ end
 if nargout > 1
     varargout{1}=xVec;
     if nargout > 2
-        if isempty(params)
-            varargout{2} = r2ss(xVec,-1.28,1.28);
-        else
-            varargout{2} = r2sv(xVec,params);
-        end
+        varargout{2} = r2sv(xVec,params);
     end
 end
 
