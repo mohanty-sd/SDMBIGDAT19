@@ -1,4 +1,4 @@
-%% Minimize the fitness CRCBQCHRPFITFUNC using PSO
+%% Minimize the fitness function CRCBQCFITFUNC using PSO
 % Data length
 nSamples = 512;
 % Sampling frequency
