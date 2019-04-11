@@ -20,6 +20,9 @@ disp(realCoord);
 % We keep the default PSO parameters, hence the third input argument is
 % empty.
 rng('default');
-psoOut = crcbpso(fitFuncHandle,2,[],1);
+psoOut = crcbpso(fitFuncHandle,2,[],2);
 figure;
 plot(psoOut.allBestFit);
+figure;
+%Caution: The figure can only be made for a 2D search space
+plot(psoOut.allBestLoc(:,1),psoOut.allBestLoc(:,2),'o-');
