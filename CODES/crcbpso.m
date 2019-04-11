@@ -64,7 +64,7 @@ c2=2;
 max_velocity = 0.2;
 dcLaw_a = 0.9;
 dcLaw_b = 0.4;
-dcLaw_c = maxSteps;
+dcLaw_c = maxSteps-1;
 dcLaw_d = 0.2;
 bndryCond = '';
 nbrhdSz = 3;
@@ -177,7 +177,7 @@ pop(:,partInertiaCols)=0;
 pop(:,partFitEvalsCols)=0;
 
 %Start PSO iterations ...
-for lpc_steps=2:maxSteps
+for lpc_steps=1:maxSteps
     %Evaluate particle fitnesses under ...
     if isempty(bndryCond)
         %Invisible wall boundary condition
@@ -229,7 +229,7 @@ for lpc_steps=2:maxSteps
         end
     end
     %Inertia decay
-    inertiaWt = max(dcLaw_a-(dcLaw_b/dcLaw_c)*(lpc_steps-1),dcLaw_d);
+    inertiaWt = max(dcLaw_a-(dcLaw_b/dcLaw_c)*lpc_steps,dcLaw_d);
     %Velocity updates ...
     for k=1:popsize
         pop(k,partInertiaCols)=inertiaWt;
