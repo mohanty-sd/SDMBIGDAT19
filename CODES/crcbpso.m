@@ -1,5 +1,5 @@
 function returnData=crcbpso(fitfuncHandle,nDim,varargin)
-% Local best PSO minimizer 
+% Local-best (lbest) PSO minimizer 
 % S=CRCBPSO(Fhandle,N)
 % Runs local best PSO on the fitness function with handle Fhandle. If Fname
 % is the name of the function, Fhandle = @(x) <Fname>(x, FP).  N is the
@@ -27,14 +27,22 @@ function returnData=crcbpso(fitfuncHandle,nDim,varargin)
 %     'endInertia': End value of inertia at iteration# <maxSteps>
 %     'boundaryCond': Set to '' for invisible walls boundary conditions.
 %                     Any other value is passed onto the fitness function
-%                     to handle. 
+%                     for further processing. 
 %     'nbrhdSz' : Number of particles in a ring topology neighborhood.
 %                 Reset to 3 if less than 3.
 %Setting P to [] will invoke the default values for all pso parameters.
 %NOTE: The optional P argument is normally to be used only for testing and
 %debugging (e.g., reduce the number of particles and/or iterations for a
-%quick run). Stable values should be hardcoded in the function and used as
-%the default.
+%quick run). Baseline default values are hardcoded in this function.
+%
+%S = CRCBPSO(Fhandle,N,P,O)
+%O is an integer that controls the amount of information returned in S. The
+%default value of O is zero and returns S as the struct defined above.
+%Progressively higher values of O increase the number of fields in S as
+%listed below.
+%   'allBestFit': O = 1. Best fitness values for all iterations returned as a vector.
+%   'allBestLoc': O = 2. Best locations in standardized coordinates for all
+%                 iterations returned as a row of a matrix. 
 %
 %Example:
 %nDim = 5;
@@ -48,11 +56,11 @@ function returnData=crcbpso(fitfuncHandle,nDim,varargin)
 % Adapted from LDACSchool/ldacpso.m
 % 
 
+%Baseline (also default) PSO parameters
 popsize=40;
 maxSteps= 2000;
 c1=2;
 c2=2;
-max_initial_velocity = 0.5;
 max_velocity = 0.2;
 dcLaw_a = 0.9;
 dcLaw_b = 0.4;
@@ -60,6 +68,11 @@ dcLaw_c = maxSteps;
 dcLaw_d = 0.2;
 bndryCond = '';
 nbrhdSz = 3;
+%Default for the level of information returned in the output
+outputLvl = 0;
+returnData = struct('totalFuncEvals',[],...
+                    'bestLocation',zeros(1,nDim),...
+                    'bestFitness',[]);
 %Override defaults if needed
 nreqArgs = 2;
 if nargin-nreqArgs
@@ -98,6 +111,21 @@ if nargin-nreqArgs
                                 case 'nbrhdSz'
                                     nbrhdSz = fieldVal;
                             end
+                        end
+                    end
+                case 2
+                    %Output level
+                    outputLvl = varargin{largs};
+                    for lpo = 1:outputLvl
+                        switch lpo
+                            case 1
+                                returnData.allBestFit = zeros(1,maxSteps);                               
+                            case 2
+                                returnData.allBestLoc = zeros(maxSteps,nDim);
+                            %Add more fields with additional case
+                            %statements
+                            otherwise
+                                error('Output level > 2 not implemented');
                         end
                     end
             end
@@ -148,14 +176,17 @@ pop(:,partFlagFitEvalCols)=1;
 pop(:,partInertiaCols)=0;
 pop(:,partFitEvalsCols)=0;
 
+%Start PSO iterations ...
 for lpc_steps=2:maxSteps
+    %Evaluate particle fitnesses under ...
     if isempty(bndryCond)
         %Invisible wall boundary condition
         fitnessValues = fitfuncHandle(pop(:,partCoordCols));
     else
-        %Special boundary condition handled by fitness function
+        %Special boundary condition (handled by fitness function)
         [fitnessValues,~,pop(:,partCoordCols)] = fitfuncHandle(pop(:,partCoordCols));
     end
+    %Fill pop matrix ...
     for k=1:popsize
         pop(k,partFitCurrCols)=fitnessValues(k);
         computeOK = pop(k,partFlagFitEvalCols);
@@ -170,6 +201,7 @@ for lpc_steps=2:maxSteps
             pop(k,partPbestCols) = pop(k,partCoordCols);
         end
     end
+    %Update gbest
     [bestFitness,bestParticle]=min(pop(:,partFitCurrCols));
     if gbestVal > bestFitness
         gbestVal = bestFitness;
@@ -177,15 +209,8 @@ for lpc_steps=2:maxSteps
         pop(bestParticle,partFitEvalsCols)=pop(bestParticle,partFitEvalsCols)+funcCount;
     else
     end
+    %Local bests ...
     for k = 1:popsize
-        %            switch k
-        %                case 1
-        %                    ringNbrs = [popsize,k,k+1];
-        %                case popsize
-        %                    ringNbrs = [k-1,k,1];
-        %                otherwise
-        %                    ringNbrs = [k-1,k,k+1];
-        %            end
         %Get indices of neighborhood particles
         ringNbrs = [(k-leftNbrs):(k-1),k,(k+1):(k+rightNbrs)];
         adjstIndx = ringNbrs<1;
@@ -193,6 +218,7 @@ for lpc_steps=2:maxSteps
         adjstIndx = ringNbrs>popsize;
         ringNbrs(adjstIndx) = ringNbrs(adjstIndx) - popsize;
         
+        %Get local best in neighborhood
         [~,lbestPart] = min(pop(ringNbrs,partFitCurrCols));
         lbestTruIndx = ringNbrs(lbestPart);
         lbestCurrSnr = pop(lbestTruIndx,partFitCurrCols);
@@ -202,7 +228,9 @@ for lpc_steps=2:maxSteps
             pop(k,partLocalBestCols) = pop(lbestTruIndx,partCoordCols);
         end
     end
+    %Inertia decay
     inertiaWt = max(dcLaw_a-(dcLaw_b/dcLaw_c)*(lpc_steps-1),dcLaw_d);
+    %Velocity updates ...
     for k=1:popsize
         pop(k,partInertiaCols)=inertiaWt;
         partInertia = pop(k,partInertiaCols);
@@ -228,12 +256,26 @@ for lpc_steps=2:maxSteps
             pop(k,partFlagFitEvalCols)=1;
         end
     end
+    
+    %Record extended output if needed
+    for lpo = 1:outputLvl
+        switch lpo
+            case 1
+                returnData.allBestFit(lpc_steps) = gbestVal;
+            case 2
+                returnData.allBestLoc(lpc_steps,:) = gbestLoc;
+            %Add more fields with additional case
+            %statements
+        end
+    end
 end
 
 actualEvaluations = sum(pop(:,partFitEvalsCols));
-returnData = struct('totalFuncEvals',actualEvaluations,...
-    'bestLocation',gbestLoc,...
-    'bestFitness',gbestVal);
+
+%Prepare main output
+returnData.totalFuncEvals = actualEvaluations;
+returnData.bestLocation = gbestLoc;
+returnData.bestFitness = gbestVal; 
 
 
 
