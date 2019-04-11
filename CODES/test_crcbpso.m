@@ -7,7 +7,7 @@ ffparams = struct('rmin',-100,...
 fitFuncHandle = @(x) crcbpsotestfunc(x,ffparams);
 %%
 % Call PSO.
-rng('default')
+rng('default');
 psoOut = crcbpso(fitFuncHandle,2);
 
 %% Estimated parameters
@@ -15,3 +15,11 @@ psoOut = crcbpso(fitFuncHandle,2);
 stdCoord = psoOut.bestLocation;
 [~,realCoord] = fitFuncHandle(stdCoord);
 disp(realCoord);
+
+%% Obtaining more information
+% We keep the default PSO parameters, hence the third input argument is
+% empty.
+rng('default');
+psoOut = crcbpso(fitFuncHandle,2,[],1);
+figure;
+plot(psoOut.allBestFit);
