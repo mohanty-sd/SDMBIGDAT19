@@ -19,8 +19,6 @@ function returnData=crcbpso(fitfuncHandle,nDim,varargin)
 %     'popSize': Number of PSO particles
 %     'maxSteps': Number of iterations for termination
 %     'c1','c2': acceleration constant
-%     'maxInitialVelocity': maximum value for each initial velocity
-%                           component
 %     'maxVelocity': maximum value for each velocity component for all
 %                     subsequent iterations
 %     'startInertia': Starting value of inertia weight
@@ -98,8 +96,8 @@ if nargin-nreqArgs
                                     c1 = fieldVal;
                                 case  'c2'
                                     c2 = fieldVal;
-                                case 'maxInitialVelocity'
-                                    max_initial_velocity = fieldVal;
+%                                 case 'maxInitialVelocity'
+%                                     max_initial_velocity = fieldVal;
                                 case 'maxVelocity'
                                     max_velocity = fieldVal;
                                 case 'startInertia'
