@@ -23,7 +23,7 @@ function returnData=crcbpso(fitfuncHandle,nDim,varargin)
 %                     subsequent iterations
 %     'startInertia': Starting value of inertia weight
 %     'endInertia': End value of inertia at iteration# <maxSteps>
-%     'boundaryCond': Set to '' for invisible walls boundary conditions.
+%     'boundaryCond': Set to '' for the "let them fly" boundary condition.
 %                     Any other value is passed onto the fitness function
 %                     for further processing. 
 %     'nbrhdSz' : Number of particles in a ring topology neighborhood.
