@@ -1,6 +1,6 @@
-function ptFlags = chkstdsrchrng(xVec)
+function ptFlags = crcbchkstdsrchrng(xVec)
 %Checks for points that are outside the standardized search range 
-%V = CHKSTDSRCHRNG(X)
+%V = CRCBCHKSTDSRCHRNG(X)
 %Returns an array of logical indices V corresponding to valid/invalid
 %points in X. A row (point) of X is invalid if any of the coordinates
 %(columns for that row) fall outside the closed interval [0,1].
