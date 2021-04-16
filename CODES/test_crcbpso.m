@@ -14,4 +14,5 @@ psoOut = crcbpso(fitFuncHandle,2);
 % Best standardized and real coordinates found.
 stdCoord = psoOut.bestLocation;
 [~,realCoord] = fitFuncHandle(stdCoord);
-disp(realCoord);
+disp(['Best location:',num2str(realCoord)]);
+disp(['Best fitness:', num2str(psoOut.bestFitness)]);
