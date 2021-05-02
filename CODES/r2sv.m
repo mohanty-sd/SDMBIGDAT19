@@ -13,6 +13,10 @@ xVec = zeros(nrows,ncols);
 rmin = params.rmin;
 rmax = params.rmax;
 rngVec = rmax-rmin;
+%If rmin = rmax for any coordinate, its standardized value should be 0.
+%For such a case, only compute the difference between the
+%coordinate and the minimum value and don't divide by the range
+rngVec(rngVec==0)=1;
 for lp = 1:nrows
     xVec(lp,:) = (rVec(lp,:)-rmin)./rngVec;
 end
