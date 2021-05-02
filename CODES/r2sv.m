@@ -1,8 +1,8 @@
 function xVec = r2sv(rVec,params)
 %Convert real coordinates to standardized ones.
 %X = R2SV(R,P)
-%Takes standardized coordinates in X (coordinates of one point per row) and
-%returns real coordinates in R using the range limits defined in P.rmin and
+%Takes real coordinates in R (coordinates of one point per row) and returns
+%standardized coordinates in X using the range limits defined in P.rmin and
 %P.rmax. The range limits can be different for different dimensions. (If
 %they are same for all dimensions, use S2RS instead.)
 
