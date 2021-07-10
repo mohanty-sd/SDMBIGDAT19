@@ -16,3 +16,13 @@ stdCoord = psoOut.bestLocation;
 [~,realCoord] = fitFuncHandle(stdCoord);
 disp(['Best location:',num2str(realCoord)]);
 disp(['Best fitness:', num2str(psoOut.bestFitness)]);
+
+%%
+% Call PSO with optional inputs
+rng('default')
+psoOut = crcbpso(fitFuncHandle,2,[],2);
+%Plot the trajectory of the best particle
+figure;
+plot(psoOut.allBestLoc(:,1),psoOut.allBestLoc(:,2),'.-'));
+figure;
+plot(psoOut.allBestFit);
