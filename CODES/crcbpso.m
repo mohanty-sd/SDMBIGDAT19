@@ -66,6 +66,9 @@ dcLaw_c = maxSteps-1;
 dcLaw_d = 0.2;
 bndryCond = '';
 nbrhdSz = 3;
+% add rowSeed and colSeed to describe seeding location, 0 if no seeding
+nrowSeed=0;
+ncolSeed=0;
 %Default for the level of information returned in the output
 outputLvl = 0;
 returnData = struct('totalFuncEvals',[],...
@@ -126,6 +129,24 @@ if nargin-nreqArgs
                                 error('Output level > 2 not implemented');
                         end
                     end
+                case 3
+                    %Matrix of locations to seed the particles
+                    %Matrix is in best stored in standardized coordinates
+                    %Matrix element A(a,b) is the bth component of ath
+                    %particle
+                    seedMatrix=varargin{largs};
+                    [nrowSeed,ncolSeed]=size(seedMatrix);
+                    if ncolSeed>nDim
+                        error('Too many coordinate parameters')
+                    end
+                    if nrowSeed>popsize
+                        seedMatrix=seedMatrix(:,1:popsize);
+                        [nrowSeed,ncolSeed]=size(seedMatrix);
+                    end
+                    %The idea here is that since the seeding matrix can and
+                    %probably would be smaller than the particle location
+                    %matrix, it would be easier to generate the location
+                    %matrix and then graft our pregenerated matrix onto it
             end
         end
     end
@@ -141,6 +162,7 @@ rightNbrs = nbrhdSz-1-leftNbrs;
 %Specify which column stores what information.
 %(The fitness function for matched filtering is SNR, hence the use of 'snr'
 %below.)
+
 partCoordCols = 1:nDim; %Particle location
 partVelCols = (nDim+1):2*nDim; %Particle velocity
 partPbestCols = (2*nDim+1):3*nDim; %Particle pbest
@@ -164,6 +186,10 @@ gbestLoc = 2*ones(1,nDim);
 % Best value found by the swarm at the current iteration
 bestFitness = inf;
 pop(:,partCoordCols)=rand(popsize,nDim);
+%mount on our seeded locations
+if (nrowSeed>0) & (ncolSeed>0)
+    pop(1:nrowSeed,1:ncolSeed)=seedMatrix;
+end
 pop(:,partVelCols)= -pop(:,partCoordCols)+rand(popsize,nDim);
 pop(:,partPbestCols)=pop(:,partCoordCols);
 pop(:,partFitPbestCols)= inf;

@@ -19,10 +19,11 @@ disp(['Best fitness:', num2str(psoOut.bestFitness)]);
 
 %%
 % Call PSO with optional inputs
-rng('default')
-psoOut = crcbpso(fitFuncHandle,2,[],2);
+rng('default');
+psoParams = struct('maxSteps',50);
+psoOut = crcbpso(fitFuncHandle,2,psoParams,2);
 %Plot the trajectory of the best particle
 figure;
-plot(psoOut.allBestLoc(:,1),psoOut.allBestLoc(:,2),'.-'));
+plot(psoOut.allBestLoc(:,1),psoOut.allBestLoc(:,2),'.-');
 figure;
 plot(psoOut.allBestFit);
