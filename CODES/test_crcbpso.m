@@ -27,3 +27,9 @@ figure;
 plot(psoOut.allBestLoc(:,1),psoOut.allBestLoc(:,2),'.-');
 figure;
 plot(psoOut.allBestFit);
+stdCoord = psoOut.bestLocation;
+[~,realCoord] = fitFuncHandle(stdCoord);
+disp(['Number of iterations changed from the default value to ',...
+      psoParams.maxSteps]);
+disp(['Best location:',num2str(realCoord)]);
+disp(['Best fitness:', num2str(psoOut.bestFitness)]);
