@@ -62,7 +62,6 @@ c2=2;
 max_velocity = 0.5;
 dcLaw_a = 0.9;
 dcLaw_b = 0.4;
-dcLaw_c = maxSteps-1;
 dcLaw_d = 0.2;
 bndryCond = '';
 nbrhdSz = 3;
@@ -106,6 +105,9 @@ if nargin-nreqArgs
                                 case 'startInertia'
                                     dcLaw_a = fieldVal;
                                 case 'endInertia'
+                                    %dcLaw_b is set to dcLaw_a - dcLaw_b
+                                    %later but stores the endIntertia for
+                                    %now
                                     dcLaw_b = fieldVal;
                                 case 'boundaryCond'
                                     bndryCond = fieldVal;
@@ -151,6 +153,9 @@ if nargin-nreqArgs
         end
     end
 end
+%Update constants involved in inertia decay 
+dcLaw_c = maxSteps;
+dcLaw_b = dcLaw_a - dcLaw_b;
 
 %Number of left and right neighbors. Even neighborhood size is split
 %asymmetrically: More right side neighbors than left side ones.
