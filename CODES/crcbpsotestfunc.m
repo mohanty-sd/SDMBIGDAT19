@@ -1,7 +1,7 @@
 function [fitVal,varargout] = crcbpsotestfunc(xVec,params)
 %A benchmark test function for CRCBPSO
 %F = CRCBPSOTESTFUNC(X,P)
-%Compute the Rastrigin fitness function for each row of X.  The fitness
+%Compute the Generalized Rastrigin fitness function for each row of X.  The fitness
 %values are returned in F. X is standardized, that is 0<=X(i,j)<=1. P has
 %two arrays P.rmin and P.rmax that are used to convert X(i,j) internally to
 %actual coordinate values before computing fitness: X(:,j) ->

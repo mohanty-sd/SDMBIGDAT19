@@ -195,7 +195,7 @@ pop(:,partCoordCols)=rand(popsize,nDim);
 if (nrowSeed>0) & (ncolSeed>0)
     pop(1:nrowSeed,1:ncolSeed)=seedMatrix;
 end
-pop(:,partVelCols)= -pop(:,partCoordCols)+rand(popsize,nDim);
+pop(:,partVelCols)= -pop(:,partCoordCols) + rand(popsize,nDim);
 pop(:,partPbestCols)=pop(:,partCoordCols);
 pop(:,partFitPbestCols)= inf;
 pop(:,partFitCurrCols)=0;
