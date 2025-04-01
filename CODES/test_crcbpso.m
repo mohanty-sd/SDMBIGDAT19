@@ -10,11 +10,17 @@ ffparams = struct('rmin',rmin,...
 fitFuncHandle = @(x) crcbpsotestfunc(x,ffparams);
 %%
 % Call PSO with default settings
+disp('Calling PSO with default settings and no optional inputs')
 rng('default')
+tic;
 psoOut1 = crcbpso(fitFuncHandle,nDim);
+toc;
 % Call PSO with default settings but return more information
+disp('Calling PSO with default settings and optional inputs')
 rng('default')
+tic;
 psoOut1 = crcbpso(fitFuncHandle,nDim,[],2);
+toc;
 
 %% Estimated parameters
 % Best standardized and real coordinates found.
@@ -26,9 +32,12 @@ disp([' Best fitness:', num2str(psoOut1.bestFitness)]);
 
 %%
 % Override default PSO parameters 
+disp('Overriding default PSO parameters');
 rng('default');
 psoParams = struct('maxSteps',500);
+tic;
 psoOut2 = crcbpso(fitFuncHandle,nDim,psoParams,2);
+toc;
 
 %% Results
 figure;
