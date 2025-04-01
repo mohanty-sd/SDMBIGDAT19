@@ -60,9 +60,8 @@ maxSteps= 2000;
 c1=2;
 c2=2;
 max_velocity = 0.5;
-dcLaw_a = 0.9;
-dcLaw_b = 0.4;
-dcLaw_d = 0.2;
+dcLaw_a = 0.9; %Starting inertia
+dcLaw_b = 0.4; %Ending inertia
 bndryCond = '';
 nbrhdSz = 3;
 % add rowSeed and colSeed to describe seeding location, 0 if no seeding
@@ -154,7 +153,6 @@ if nargin-nreqArgs
     end
 end
 %Update constants involved in inertia decay 
-dcLaw_c = maxSteps;
 dcLaw_b = dcLaw_a - dcLaw_b;
 
 %Number of left and right neighbors. Even neighborhood size is split
@@ -258,7 +256,7 @@ for lpc_steps=1:maxSteps
         end
     end
     %Inertia decay
-    inertiaWt = max(dcLaw_a-(dcLaw_b/dcLaw_c)*lpc_steps,dcLaw_d);
+    inertiaWt = dcLaw_a-(dcLaw_b/(maxSteps-1))*(lpc_steps-1);
     %Velocity updates ...
     for k=1:popsize
         pop(k,partInertiaCols)=inertiaWt;
