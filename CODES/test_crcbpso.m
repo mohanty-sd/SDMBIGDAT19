@@ -27,6 +27,8 @@ psoParams = struct('maxSteps',500);
 psoOut = crcbpso(fitFuncHandle,nDim,psoParams,2);
 
 %% Results
+figure;
+plot(psoOut.allBestFit);
 if nDim == 2
     %Plot the trajectory of the best particle
     figure;
@@ -51,8 +53,6 @@ if nDim == 2
     figure;
     title('Plot of fitness function');
     surf(X,Y,fitVal4plot); shading interp;
-    figure;
-    plot(psoOut.allBestFit);
 end
 stdCoord = psoOut.bestLocation;
 [~,realCoord] = fitFuncHandle(stdCoord);
