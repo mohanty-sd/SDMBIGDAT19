@@ -1,5 +1,9 @@
 function returnData=crcbpso(fitfuncHandle,nDim,varargin)
-% Local-best (lbest) PSO minimizer 
+% Local-best (lbest) PSO minimizer
+%P = CRCBPSO()
+%Simply returns a structure containing the PSO parameters and their default
+%values.
+%
 % S=CRCBPSO(Fhandle,N)
 % Runs local best PSO on the fitness function with handle Fhandle. If Fname
 % is the name of the function, Fhandle = @(x) <Fname>(x, FP).  N is the
@@ -22,7 +26,9 @@ function returnData=crcbpso(fitfuncHandle,nDim,varargin)
 %     'maxVelocity': maximum value for each velocity component for all
 %                     subsequent iterations
 %     'startInertia': Starting value of inertia weight
-%     'endInertia': End value of inertia at iteration# <maxSteps>
+%     'endInertia': End value of inertia 
+%     'endInertiaIter': Iteration number at which endInertia is reached. If
+%     less than maxSteps, inertia stays constant at endInertia.
 %     'boundaryCond': Set to '' for the "let them fly" boundary condition.
 %                     Any other value is passed onto the fitness function
 %                     for further processing. 
@@ -60,10 +66,24 @@ maxSteps= 2000;
 c1=2;
 c2=2;
 max_velocity = 0.5;
-dcLaw_a = 0.9; %Starting inertia
-dcLaw_b = 0.4; %Ending inertia
+startInertia = 0.9;
+endInertia = 0.4;
+endInertiaIter = maxSteps;
 bndryCond = '';
 nbrhdSz = 3;
+if nargin == 0
+    returnData = struct('popSize',popsize,...
+                        'maxSteps',maxSteps,...
+                        'c1',c1,...
+                        'c2',c2,...
+                        'maxVelocity',max_velocity,...
+                        'startInertia', startInertia,...
+                        'endInertia', endInertia,...
+                        'endInertiaIter',endInertiaIter,...
+                        'boundaryCond', bndryCond,...
+                        'nbrhdSz', nbrhdSz);
+    return;
+end
 % add rowSeed and colSeed to describe seeding location, 0 if no seeding
 nrowSeed=0;
 ncolSeed=0;
@@ -93,6 +113,20 @@ if nargin-nreqArgs
                                     popsize = fieldVal;
                                 case 'maxSteps'
                                     maxSteps = fieldVal;
+                                    %Since endInertiaIter is tied to
+                                    %maxStep if it is not specified by the
+                                    %user, check for its presence in
+                                    %psoParams
+                                    chk = 0;
+                                    for k = 1:length(psoParfieldNames)
+                                        if strcmp(psoParfieldNames{k},'endInertiaIter')
+                                            chk = 1;
+                                            break;
+                                        end
+                                    end
+                                    if ~chk
+                                        endInertiaIter = maxSteps;
+                                    end
                                 case  'c1'
                                     c1 = fieldVal;
                                 case  'c2'
@@ -152,8 +186,6 @@ if nargin-nreqArgs
         end
     end
 end
-%Update constants involved in inertia decay 
-dcLaw_b = dcLaw_a - dcLaw_b;
 
 %Number of left and right neighbors. Even neighborhood size is split
 %asymmetrically: More right side neighbors than left side ones.
@@ -256,7 +288,7 @@ for lpc_steps=1:maxSteps
         end
     end
     %Inertia decay
-    inertiaWt = dcLaw_a-(dcLaw_b/(maxSteps-1))*(lpc_steps-1);
+    inertiaWt = max(startInertia-((startInertia-endInertia)/(endInertiaIter-1))*(lpc_steps-1),endInertia);
     %Velocity updates ...
     for k=1:popsize
         pop(k,partInertiaCols)=inertiaWt;

@@ -34,7 +34,7 @@ disp([' Best fitness:', num2str(psoOut1.bestFitness)]);
 % Override default PSO parameters 
 disp('Overriding default PSO parameters');
 rng('default');
-psoParams = struct('maxSteps',500);
+psoParams = struct('maxSteps',10000);
 tic;
 psoOut2 = crcbpso(fitFuncHandle,nDim,psoParams,2);
 toc;
