@@ -8,6 +8,11 @@ ffparams = struct('rmin',rmin,...
                   );
 % Fitness function handle.
 fitFuncHandle = @(x) crcbpsotestfunc(x,ffparams);
+
+%% Default PSO settings
+disp('Default PSO settings');
+disp(crcbpso());
+
 %%
 % Call PSO with default settings
 disp('Calling PSO with default settings and no optional inputs')
@@ -21,12 +26,9 @@ rng('default')
 tic;
 psoOut1 = crcbpso(fitFuncHandle,nDim,[],2);
 toc;
-
-%% Estimated parameters
 % Best standardized and real coordinates found.
 stdCoord = psoOut1.bestLocation;
 [~,realCoord] = fitFuncHandle(stdCoord);
-disp('Default number of iterations')
 disp([' Best location:',num2str(realCoord)]);
 disp([' Best fitness:', num2str(psoOut1.bestFitness)]);
 
@@ -34,7 +36,9 @@ disp([' Best fitness:', num2str(psoOut1.bestFitness)]);
 % Override default PSO parameters 
 disp('Overriding default PSO parameters');
 rng('default');
-psoParams = struct('maxSteps',10000);
+psoParams = struct();
+psoParams.maxSteps = 30000; disp(['Changing maxSteps to:',num2str(psoParams.maxSteps)]);
+psoParams.maxVelocity = 0.9; disp(['Changing maxVelocity to:',num2str(psoParams.maxVelocity)]);
 tic;
 psoOut2 = crcbpso(fitFuncHandle,nDim,psoParams,2);
 toc;
@@ -44,10 +48,12 @@ figure;
 plot(psoOut1.allBestFit);
 xlabel('Iteration number');
 ylabel('Global best fitness');
+title('Default PSO settings');
 figure;
 plot(psoOut2.allBestFit);
 xlabel('Iteration number');
 ylabel('Global best fitness');
+title('Non-default PSO settings');
 if nDim == 2
     %Plot the trajectory of the best particle
     figure;
@@ -75,7 +81,5 @@ if nDim == 2
 end
 stdCoord = psoOut2.bestLocation;
 [~,realCoord] = fitFuncHandle(stdCoord);
-disp(['Number of iterations changed from the default value to ',...
-      num2str(psoParams.maxSteps)]);
 disp([' Best location:',num2str(realCoord)]);
 disp([' Best fitness:', num2str(psoOut2.bestFitness)]);
