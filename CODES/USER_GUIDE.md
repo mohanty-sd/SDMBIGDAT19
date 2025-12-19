@@ -145,7 +145,7 @@ inParams = struct(...
 
 **Signal Model**: `s(t) = A*sin(2π(a1*t + a2*t² + a3*t³))`
 - PSO optimizes the phase coefficients [a1, a2, a3]
-- Amplitude A is determined by maximizing the inner product with the data (matched filtering)
+- Amplitude A is optimized implicitly: the fitness function normalizes the signal and uses the negative squared inner product with the data, which maximizes correlation (matched filtering)
 
 **Output Structure**:
 ```matlab
@@ -413,7 +413,7 @@ validPts = crcbchkstdsrchrng(xVec);
 fitVal(~validPts) = inf;
 
 % Convert valid points from standardized to real coordinates
-% Note: This modifies xVec in place for valid points only
+% Note: This creates a copy and converts valid points to real coordinates
 realCoords = xVec;
 realCoords(validPts, :) = s2rv(xVec(validPts, :), params);
 
@@ -597,8 +597,9 @@ end
 - **Default**: Start at 0.9, end at 0.4
 - High inertia → exploration (early iterations)
 - Low inertia → exploitation (late iterations)
-- Linear decay: `w(t) = startInertia - (startInertia - endInertia) * t / endInertiaIter`
+- Linear decay: `w(t) = max(startInertia - ((startInertia - endInertia) / (endInertiaIter - 1)) * (t - 1), endInertia)`
   - Note: `endInertiaIter` may be different from `maxSteps` if specified separately
+  - The formula uses `(endInertiaIter - 1)` in the denominator for proper interpolation
 
 #### Neighborhood Size (`nbrhdSz`)
 - **Default**: 3
