@@ -144,6 +144,8 @@ inParams = struct(...
 ```
 
 **Signal Model**: `s(t) = A*sin(2π(a1*t + a2*t² + a3*t³))`
+- PSO optimizes the phase coefficients [a1, a2, a3]
+- Amplitude A is determined by maximizing the inner product with the data (matched filtering)
 
 **Output Structure**:
 ```matlab
@@ -169,8 +171,8 @@ inParams = struct(...
     'dataX', timeStamps,        % Time stamps
     'dataY', dataVector,        % Data values
     'nBrks', nBreakpoints,      % Number of breakpoints to optimize
-    'rminVal', 0.0,             % Minimum standardized breakpoint value
-    'rmaxVal', 1.0              % Maximum standardized breakpoint value
+    'rminVal', 0.0,             % Minimum standardized breakpoint value (note: uses 'Val' suffix)
+    'rmaxVal', 1.0              % Maximum standardized breakpoint value (note: uses 'Val' suffix)
 );
 ```
 
@@ -411,13 +413,15 @@ validPts = crcbchkstdsrchrng(xVec);
 fitVal(~validPts) = inf;
 
 % Convert valid points from standardized to real coordinates
-xVec(validPts, :) = s2rv(xVec(validPts, :), params);
+% Note: This modifies xVec in place for valid points only
+realCoords = xVec;
+realCoords(validPts, :) = s2rv(xVec(validPts, :), params);
 
 % Evaluate fitness for each valid point
 for lpc = 1:nrows
     if validPts(lpc)
         % YOUR FITNESS COMPUTATION HERE
-        x = xVec(lpc, :);
+        x = realCoords(lpc, :);
         
         % Example: Sum of squares
         fitVal(lpc) = sum(x.^2);
@@ -429,10 +433,10 @@ end
 
 % Optional: Return real coordinates if requested
 if nargout > 1
-    varargout{1} = xVec;
+    varargout{1} = realCoords;
     if nargout > 2
         % Convert back to standardized coordinates if needed
-        varargout{2} = r2sv(xVec, params);
+        varargout{2} = r2sv(realCoords, params);
     end
 end
 end
@@ -464,11 +468,12 @@ function [fitVal, varargout] = my_rosenbrock(xVec, params)
 fitVal = zeros(nrows, 1);
 validPts = crcbchkstdsrchrng(xVec);
 fitVal(~validPts) = inf;
-xVec(validPts, :) = s2rv(xVec(validPts, :), params);
+realCoords = xVec;
+realCoords(validPts, :) = s2rv(xVec(validPts, :), params);
 
 for lpc = 1:nrows
     if validPts(lpc)
-        x = xVec(lpc, :);
+        x = realCoords(lpc, :);
         % Rosenbrock function (requires at least 2 dimensions)
         if length(x) < 2
             error('Rosenbrock requires at least 2 dimensions');
@@ -482,7 +487,7 @@ for lpc = 1:nrows
 end
 
 if nargout > 1
-    varargout{1} = xVec;
+    varargout{1} = realCoords;
 end
 end
 ```
@@ -507,7 +512,8 @@ function [fitVal, varargout] = my_data_fit_func(xVec, params)
 fitVal = zeros(nrows, 1);
 validPts = crcbchkstdsrchrng(xVec);
 fitVal(~validPts) = inf;
-xVec(validPts, :) = s2rv(xVec(validPts, :), params);
+realCoords = xVec;
+realCoords(validPts, :) = s2rv(xVec(validPts, :), params);
 
 % Extract data from params
 dataX = params.dataX;
@@ -515,7 +521,7 @@ dataY = params.dataY;
 
 for lpc = 1:nrows
     if validPts(lpc)
-        x = xVec(lpc, :);  % Model parameters
+        x = realCoords(lpc, :);  % Model parameters (in real coordinates)
         
         % Generate model prediction
         modelY = my_model(dataX, x);  % Your model here
@@ -536,7 +542,7 @@ for lpc = 1:nrows
 end
 
 if nargout > 1
-    varargout{1} = xVec;
+    varargout{1} = realCoords;
 end
 end
 ```
@@ -591,7 +597,8 @@ end
 - **Default**: Start at 0.9, end at 0.4
 - High inertia → exploration (early iterations)
 - Low inertia → exploitation (late iterations)
-- Linear decay: `w(t) = startInertia - (startInertia - endInertia) * t / maxSteps`
+- Linear decay: `w(t) = startInertia - (startInertia - endInertia) * t / endInertiaIter`
+  - Note: `endInertiaIter` may be different from `maxSteps` if specified separately
 
 #### Neighborhood Size (`nbrhdSz`)
 - **Default**: 3
@@ -839,7 +846,7 @@ rng(12345);      % Specific seed
 For questions about this code:
 - Author: Soumya D. Mohanty
 - Course: BigDat 2019 Winter School, Cambridge University
-- Repository: [SDMBIGDAT19](https://github.com/mohanty-sd/SDMBIGDAT19)
+- Repository: Check the README.md for repository information and links
 
 ---
 
