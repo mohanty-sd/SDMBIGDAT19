@@ -234,16 +234,23 @@ test_crcbpso
 ```
 
 **Generated Plots**:
-- Convergence plot showing global best fitness vs. iteration number
-- (For 2D): Trajectory of best particle overlaid on fitness contours
-- (For 2D): 3D surface plot of fitness function
+- Convergence plot showing global best fitness vs. iteration number using default PSO parameters.
+ ![Convergence plot showing global best fitness vs. iteration number](USER_GUIDE_FIGURES/test_crcbpso_plot1.png)
+- Convergence plot showing global best fitness vs. iteration number using modified PSO parameters.
+ ![Convergence plot showing global best fitness vs. iteration number](USER_GUIDE_FIGURES/test_crcbpso_plot2.png)
 
-**Expected Output**:
+**Expected Output (truncated)**:
 ```
-Default PSO settings
-Calling PSO with default settings...
-Best location: [values near zeros]
-Best fitness: [small value, ideally near 0]
+Calling PSO with default settings and optional inputs
+Elapsed time is 1.487725 seconds.
+ Best location: [Standardized coordinates of best location]
+ Best fitness:33.9412
+Overriding default PSO parameters
+Changing maxSteps to:30000
+Changing maxVelocity to:0.9
+Elapsed time is 17.495227 seconds.
+ Best location: [Standardized coordinates of best location]
+ Best fitness:7.9597
 ```
 
 **Customization**:
@@ -252,6 +259,7 @@ Best fitness: [small value, ideally near 0]
 - Adjust `psoParams.maxSteps` for longer/shorter optimization
 
 ### `test_crcbpso_par.m` - Parallel PSO Test
+Skip if Parallel Computing Toolbox is not available.
 
 **Purpose**: Demonstrates running multiple independent PSO runs in parallel.
 
