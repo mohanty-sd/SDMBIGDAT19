@@ -1,4 +1,4 @@
-# User Guide for SDMBIGDAT19 - PSO-Based Statistical Regression
+# User Guide for PSO Matlab Code
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -10,6 +10,7 @@
 7. [Advanced Usage](#advanced-usage)
 8. [Troubleshooting](#troubleshooting)
 9. [References](#references)
+10. [Additional Resources](#additional-resources)
 
 ## Introduction
 
@@ -659,9 +660,8 @@ end
 
 For questions about this code:
 - Author: Soumya D. Mohanty
-- Course: BigDat 2019 Winter School, Cambridge University
-- Repository: Check the README.md for repository information and links
+- Email: soumya.mohanty@utrgv.edu
 
 ---
 
-*This user guide was created to accompany the SDMBIGDAT19 repository for the BigDat 2019 winter school course on swarm intelligence methods for statistical regression.*
+*This user guide was partially created by GitHub CoPilot.*
