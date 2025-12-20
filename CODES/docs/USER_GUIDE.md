@@ -86,6 +86,9 @@ Most functions in this codebase follow the naming pattern `crcb<functionname>.m`
 
 Test scripts with filenames following the pattern `test_crcb<name>.m` reproduce examples from the book and demonstrate how to use the provided functions.
 
+### List of Core Functions
+See [CodeList.pdf](docs/CodeList.pdf) for a list of functions with brief documentation.
+
 ### 1. `crcbpso` - Main PSO Implementation
 
 **Purpose**: Local-best (lbest) PSO minimizer with ring topology neighborhood [2].
@@ -658,7 +661,7 @@ end
 
 ### Related Documentation
 
-- See lecture slides in the `SLIDES` directory of this repository for theoretical background.
+- The lecture slides in the `SLIDES` directory of this repository provide a compressed version of the material covered in more depth in the textbook.
 - Use Matlab's `help` command to get high level documentation of each function's interface. In addition to the help, each function is documented internally.
 
 ### Contact and Support
