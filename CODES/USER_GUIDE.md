@@ -259,7 +259,6 @@ Elapsed time is 17.495227 seconds.
 - Adjust `psoParams.maxSteps` for longer/shorter optimization
 
 ### `test_crcbpso_par.m` - Parallel PSO Test
-Skip if Parallel Computing Toolbox is not available.
 
 **Purpose**: Demonstrates running multiple independent PSO runs in parallel.
 
@@ -288,7 +287,6 @@ Info for all runs:
 **Why use multiple runs?**
 - PSO is stochastic; different runs may converge to different local minima
 - Multiple runs increase the probability of finding the global optimum
-- Best practice for production use
 
 ### `test_crcbqcpso.m` - Quadratic Chirp Signal Recovery
 
@@ -317,24 +315,23 @@ nRuns = 8;             % Number of independent PSO runs
 ```
 
 **Generated Plot**:
-- Data points (dots)
-- True signal (solid line)
-- Estimated signals from all runs (light green, thick)
-- Best estimated signal (dark green, medium thick)
+- Data points (dots); True signal (solid line); Estimated signals from all runs (light green, thick); Best estimated signal (dark green, medium thick). The best estimated signal overlaps the true signal closely, hence the two are indistinguishable.
+    ![Plot showing data, true signal, and estimated signals](USER_GUIDE_FIGURES/test_crcbqcpso_plot.png)
 
 **Expected Output**:
 ```
 Estimated parameters: a1=[value]; a2=[value]; a3=[value]
 ```
-Values should be close to the true parameters (10, 3, 3).
+Values will be within expected margins of error around the true parameters (10, 3, 3).
 
 ### `test_crcbregsplpso.m` - B-Spline Regression
 
 **Purpose**: Demonstrates PSO-based optimization of B-spline breakpoints for signal fitting.
 
 **What it does**:
-1. Generates data containing a B-spline signal with known breakpoints
-2. Uses PSO to find optimal breakpoint locations
+1. Generates data containing a signal
+2. Adds white Gaussian noise
+2. Finds the best fit spline, using PSO to find optimal knot locations
 3. Runs multiple independent PSO runs
 4. Plots results showing data, true signal, and fitted splines
 
@@ -342,31 +339,29 @@ Values should be close to the true parameters (10, 3, 3).
 ```matlab
 test_crcbregsplpso
 ```
+**Requirements**: Curve Fitting Toolbox and Parallel Computing Toolbox (change `parfor` to `for` if not available)
 
 **Parameters to adjust**:
 ```matlab
-nSamples = 512;                              % Number of data samples
-snr = 10;                                    % Signal-to-noise ratio
-sigBrkPts = [0.3, 0.4, 0.45, 0.5, 0.55];    % True breakpoints
-nDim = 5;                                    % Number of breakpoints to optimize
-nRuns = 4;                                   % Number of PSO runs
+nSamples = 512;           % Number of data samples
+snr = 10;                 % Signal-to-noise ratio
+sigBrkPts = [0.3, 0.4, 0.45, 0.5, 0.55];  % True knots
+nDim = 5;                 % Number of breakpoints to optimize
+nRuns = 4;                 % Number of PSO runs
 ```
 
 **Generated Plot**:
-- Data points (dots)
-- True signal (solid line)
-- Estimated signals from all runs (light green)
-- Best estimated signal (dark green)
-- Optimal breakpoint locations (squares at bottom)
+- Data points (dots); True signal (solid line); Estimated signals from all runs (light green); Best estimated signal (dark green); Optimal knot locations (squares)
+    ![Plot showing data, true signal, and estimated splines](USER_GUIDE_FIGURES/test_crcbregsplpso_plot.png)
 
 ### `test_crcbcrdnlsplfit.m` - Direct B-Spline Fit
 
-**Purpose**: Demonstrates non-PSO B-spline fitting with uniform breakpoints.
+**Purpose**: Demonstrates non-PSO B-spline fitting with uniformly spaced interior knots.
 
 **What it does**:
-1. Generates data containing a B-spline signal
-2. Fits a B-spline using uniformly spaced interior breakpoints
-3. Plots data, true signal, fitted signal, and breakpoint locations
+1. Generates data containing a signal (identical to `test_crcbregsplpso.m`)
+2. Fits a spline using uniformly spaced interior knots
+3. Plots data, true signal, fitted signal, and knot locations
 
 **How to run**:
 ```matlab
@@ -375,11 +370,15 @@ test_crcbcrdnlsplfit
 
 **Comparison with PSO method**:
 - **Advantages**: Faster, no stochastic variation, analytical solution
-- **Disadvantages**: Cannot optimize breakpoint locations, may not fit as well as PSO-optimized splines
+- **Disadvantages**: Cannot optimize knot locations, may not fit as well as PSO-optimized splines
+
+**Generated Plot**:
+- Data points (dots); True signal (solid line); Fitted signal (green line); Knot locations (squares)
+    ![Plot showing data, true signal, and fitted spline](USER_GUIDE_FIGURES/test_crcbcrdnlsplfit_plot.png)
 
 ### `crcbplotfitfunc.m` - Fitness Function Visualization
 
-**Purpose**: Creates surface and contour plots of the Rastrigin test function.
+**Purpose**: Creates surface and contour plots of the Generalized Rastrigin test function.
 
 **What it does**:
 1. Generates a 2D grid over the search space
@@ -399,7 +398,11 @@ plotRmax = 5;       % Maximum coordinate value
 plotStpSz = 0.01;   % Grid step size (smaller = more detailed, slower)
 ```
 
-**Use case**: Understanding the fitness landscape before optimization.
+**Use case**: Illustrates the complicated fitness landscape that PSO is able to optimize over.
+
+**Generated Plots**:
+- 3D surface plot of the Generalized Rastrigin function
+ ![3D surface plot of the Generalized Rastrigin function](USER_GUIDE_FIGURES/crcbplotfitfunc_plot.png)
 
 ## Creating Custom Fitness Functions
 
@@ -461,7 +464,7 @@ end
 ### Key Requirements
 
 1. **Input Format**:
-   - `xVec`: Matrix where each row is a point in standardized coordinates [0,1]
+   - `xVec`: Matrix where each row contains the standardized coordinates of a point in the search space
    - `params`: Structure with at least `rmin` and `rmax` fields
 
 2. **Coordinate Conversion**:
@@ -515,141 +518,7 @@ params = struct('rmin', -5*ones(1,nDim), 'rmax', 5*ones(1,nDim));
 fitHandle = @(x) my_rosenbrock(x, params);
 psoOut = crcbpso(fitHandle, nDim);
 ```
-
-### Data Fitting Example
-
-For fitting models to data, your fitness function should:
-
-```matlab
-function [fitVal, varargout] = my_data_fit_func(xVec, params)
-% Fitness function for fitting model to data
-
-[nrows, ~] = size(xVec);
-fitVal = zeros(nrows, 1);
-validPts = crcbchkstdsrchrng(xVec);
-fitVal(~validPts) = inf;
-realCoords = xVec;
-realCoords(validPts, :) = s2rv(xVec(validPts, :), params);
-
-% Extract data from params
-dataX = params.dataX;
-dataY = params.dataY;
-
-for lpc = 1:nrows
-    if validPts(lpc)
-        x = realCoords(lpc, :);  % Model parameters (in real coordinates)
-        
-        % Generate model prediction
-        modelY = my_model(dataX, x);  % Your model here
-        
-        % Compute fitness (e.g., sum of squared residuals)
-        residuals = dataY - modelY;
-        fitVal(lpc) = sum(residuals.^2);
-        
-        % Alternative fitness measures:
-        % fitVal(lpc) = norm(residuals);        % L2 norm
-        % fitVal(lpc) = sum(abs(residuals));    % L1 norm
-        % fitVal(lpc) = max(abs(residuals));    % L-infinity norm
-        
-        % For matched filtering (like QC example):
-        % modelY = modelY / norm(modelY);  % Normalize
-        % fitVal(lpc) = -(dataY * modelY');  % Negative inner product
-    end
-end
-
-if nargout > 1
-    varargout{1} = realCoords;
-end
-end
-```
-
-### Tips for Good Fitness Functions
-
-1. **Normalization**: Normalize your model predictions for better numerical stability
-   ```matlab
-   modelY = modelY / norm(modelY);
-   ```
-
-2. **Precomputation**: Store expensive computations in `params`
-   ```matlab
-   params.dataXSq = params.dataX.^2;  % Compute once, use many times
-   ```
-
-3. **Vectorization**: Evaluate multiple points at once for speed
-   ```matlab
-   % Instead of loop, compute all at once if possible
-   fitVal = sum((dataY - modelY).^2, 2);  % Sum along dimension 2
-   ```
-
-4. **Fitness Scaling**: If fitness values vary over many orders of magnitude, consider using log-scale
-   ```matlab
-   fitVal(lpc) = log10(sum(residuals.^2) + eps);  % eps prevents log(0)
-   ```
-
 ## Advanced Usage
-
-### Tuning PSO Parameters
-
-#### Population Size (`popSize`)
-- **Default**: 40
-- **Small (10-20)**: Faster, may miss global optimum
-- **Large (50-100)**: Slower, better exploration
-- **Rule of thumb**: 10 + 2*sqrt(nDim)
-
-#### Iterations (`maxSteps`)
-- **Default**: 2000
-- Increase if convergence plot still decreasing
-- Decrease for faster preliminary tests
-- Monitor `totalFuncEvals` for computational budget
-
-#### Acceleration Constants (`c1`, `c2`)
-- **Default**: c1 = 2, c2 = 2
-- `c1`: Cognitive component (particle's own experience)
-- `c2`: Social component (swarm's collective knowledge)
-- Increase `c1` for more exploration
-- Increase `c2` for faster convergence
-
-#### Inertia Weight Schedule
-- **Default**: Start at 0.9, end at 0.4
-- High inertia → exploration (early iterations)
-- Low inertia → exploitation (late iterations)
-- Linear decay [2]: `w(t) = max(startInertia - ((startInertia - endInertia) / (endInertiaIter - 1)) * (t - 1), endInertia)`
-  - Note: `endInertiaIter` may be different from `maxSteps` if specified separately
-  - The formula uses `(endInertiaIter - 1)` in the denominator for proper interpolation
-
-#### Neighborhood Size (`nbrhdSz`)
-- **Default**: 3
-- Smaller → slower information spread, more exploration
-- Larger → faster convergence, risk of premature convergence
-- Must be ≥ 3
-
-### Multiple Independent Runs
-
-**Why use multiple runs?**
-- PSO is stochastic; results vary between runs
-- Multiple runs help find global optimum
-- Provides confidence intervals on results
-
-**Best practice pattern**:
-```matlab
-nRuns = 10;
-results = cell(nRuns, 1);
-
-parfor i = 1:nRuns
-    rng(i);  % Different seed for each run
-    results{i} = crcbpso(fitHandle, nDim, psoParams);
-end
-
-% Find best run
-bestFit = inf;
-bestResult = [];
-for i = 1:nRuns
-    if results{i}.bestFitness < bestFit
-        bestFit = results{i}.bestFitness;
-        bestResult = results{i};
-    end
-end
-```
 
 ### Seeding Initial Particle Locations
 
@@ -729,18 +598,12 @@ end
    - Increase `maxSteps`
    - Plot convergence to see if still improving
 
-2. **Population too small**
-   - Increase `popSize`
-   - Try popSize = 10 + 2*sqrt(nDim)
-
-3. **Search space issues**
+2. **Search space issues**
    - Check `rmin` and `rmax` include the optimum
    - Verify fitness function returns sensible values
 
-4. **Premature convergence**
-   - Increase `nbrhdSz` for slower convergence
-   - Increase `endInertia` for more late-stage exploration
-   - Run multiple independent runs
+3. **Number of independent runs too low**
+   - Increase `nRuns` to improve chances of finding global optimum
 
 ### Problem: Fitness function errors
 
@@ -753,50 +616,6 @@ end
 2. **"Undefined function or variable"**
    - Make sure helper functions (s2rv, r2sv, etc.) are in path
    - Check that data fields in `params` are correctly named
-
-3. **NaN or Inf fitness values**
-   - Add bounds checking in fitness function
-   - Handle edge cases (division by zero, log of negative, etc.)
-   ```matlab
-   fitVal(lpc) = sum(x.^2);
-   if isnan(fitVal(lpc)) || isinf(fitVal(lpc))
-       fitVal(lpc) = 1e10;  % Large but finite penalty
-   end
-   ```
-
-### Problem: Parallel runs not working
-
-**Solutions**:
-
-1. **Parallel Computing Toolbox not available**
-   - Change `parfor` to `for` in the code
-   - Example: In `crcbqcpso.m` line 55, change:
-     ```matlab
-     parfor lpruns = 1:nRuns
-     ```
-     to:
-     ```matlab
-     for lpruns = 1:nRuns
-     ```
-
-2. **Parallel pool issues**
-   - Manually start parallel pool:
-     ```matlab
-     parpool('local', 4);  % 4 workers
-     ```
-   - Or delete pool and retry:
-     ```matlab
-     delete(gcp('nocreate'));
-     ```
-
-### Problem: B-spline functions not working
-
-**Error**: "Undefined function 'bspline' or 'fnval'"
-
-**Solution**: Install Curve Fitting Toolbox
-- Check if installed: `ver` (look for Curve Fitting Toolbox)
-- If missing, install from MATLAB Add-Ons
-- Alternative: Use non-B-spline methods or implement basic B-splines
 
 ### Problem: Slow execution
 
@@ -823,35 +642,11 @@ end
    - Run multiple PSO runs in parallel
    - Ensure `parfor` is used for multiple runs
 
-### Problem: Results not reproducible
-
-**Solution**: Set random seed before each run
-```matlab
-rng('default');  % Always same sequence
-% or
-rng(12345);      % Specific seed
-```
-
-### Problem: Convergence to wrong solution
-
-**Indicators**:
-- Fitness better than expected → may be bug in fitness function
-- Solution far from known optimum → local minimum trap
-
-**Solutions**:
-1. Verify fitness function is correct
-2. Run multiple independent runs
-3. Try different PSO parameters
-4. Use broader search space
-5. Seed particles near known good solutions
-
 ## References
 
 [1] Kennedy, J., & Eberhart, R. (1995). Particle swarm optimization. *Proceedings of ICNN'95 - International Conference on Neural Networks*, 1942-1948. IEEE.
 
 [2] Bratton, D., & Kennedy, J. (2007). Defining a standard for particle swarm optimization. 2007 IEEE Swarm Intelligence Symposium, 120–127. IEEE.
-
-[3] Shi, Y., & Eberhart, R. (1998). A modified particle swarm optimizer. *1998 IEEE International Conference on Evolutionary Computation Proceedings. IEEE World Congress on Computational Intelligence*, 69-73. IEEE.
 
 ## Additional Resources
 
