@@ -653,8 +653,7 @@ end
 
 ### Related Documentation
 
-- See `CodeDoc.pdf` in the `CODES` directory for detailed function documentation
-- See lecture slides in `SLIDES` directory for theoretical background
+- See lecture slides in the `SLIDES` directory of this repository for theoretical background
 
 ### Contact and Support
 
