@@ -14,8 +14,8 @@ sigBrkPts = [0.3,0.4,0.45,0.5,0.55];
 nDim = 5;
 % Range for the standardized parameters (clscheme) representing the
 % breakpoints
-rminVal = 0.0;
-rmaxVal = 1.0;
+rmin = 0.0;
+rmax = 1.0;
 
 %%
 % Number of independent PSO runs
@@ -33,8 +33,8 @@ rng('default');
 inParams = struct('dataX', dataX,...
                   'dataY', dataY,...
                   'nBrks',nDim,...
-                  'rminVal',rminVal,...
-                  'rmaxVal',rmaxVal);
+                  'rmin',rmin,...
+                  'rmax',rmax);
                   
 % CRCBREGSPLPSO runs PSO on the CRCBREGSPLFITFUNC fitness function. As an
 % illustration of usage, we change one of the PSO parameters from its

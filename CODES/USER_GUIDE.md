@@ -36,6 +36,7 @@ The following MATLAB toolboxes are required to run all features of this code:
 
 1. **Curve Fitting Toolbox** - Required for B-spline functions (`bspline`, `fnval`)
    - Used in: `crcbregsplfitfunc.m`, `crcbcrdnlsplfit.m`, `crcbgenbsplsig.m`
+   - Not needed if this application is not used or tested.
 
 2. **Parallel Computing Toolbox** (Optional) - For parallel PSO runs
    - Used in: `test_crcbpso_par.m`, `crcbqcpso.m`, `crcbregsplpso.m`
@@ -55,6 +56,8 @@ The following MATLAB toolboxes are required to run all features of this code:
 ## Quick Start
 
 ### Running Your First PSO Optimization
+
+This example demonstrates how to run the PSO algorithm on a simple test function (Generalized Rastrigin) using default settings.
 
 ```matlab
 % Define search space dimensionality
@@ -79,7 +82,13 @@ disp(['Best location: ', num2str(psoOut.bestLocation)]);
 
 ### 1. `crcbpso` - Main PSO Implementation
 
-**Purpose**: Local-best (lbest) PSO minimizer with ring topology neighborhood [1].
+**Purpose**: Local-best (lbest) PSO minimizer with ring topology neighborhood [2].
+
+**Design Features**: The PSO code can handle arbitrary dimensionality, customizable parameters, and optional seeding of initial particle locations. It can run on any fitness function that adheres to the specified input/output format (described in [Creating Custom Fitness Functions](#creating-custom-fitness-functions)). This is done by passing a **handle** to the fitness function, which is initialized with all the fitness function parameters embedded. For example,
+```matlab
+fitFuncHandle = @(x) my_fitness_func(x, fitFuncParams);
+```
+The PSO code calls the fitness function with **standardized coordinates**, with values in [0,1], of particle locations in the search space. The fitness function handles the conversion to **real coordinates** using helper functions `s2rv` and `r2sv` and the search ranges specified in the `rmax` and `rmin` fields of the fitness function's parameter structure.
 
 **Syntax**:
 ```matlab
@@ -90,7 +99,7 @@ returnData = crcbpso(fitfuncHandle, nDim, psoParams, outputLevel, seedMatrix)
 ```
 
 **Input Arguments**:
-- `fitfuncHandle`: Handle to the fitness function to minimize
+- `fitfuncHandle`: Handle to the fitness function to minimize 
 - `nDim`: Dimensionality of the search space
 - `psoParams` (optional): Structure with PSO parameters (see below)
 - `outputLevel` (optional): Controls amount of information returned (0, 1, or 2)
@@ -103,7 +112,7 @@ psoParams = struct(...
     'maxSteps', 2000,           % Number of iterations
     'c1', 2,                    % Cognitive acceleration constant
     'c2', 2,                    % Social acceleration constant
-    'maxVelocity', 0.5,         % Maximum velocity component
+    'maxVelocity', 0.5,         % Maximum velocity per component
     'startInertia', 0.9,        % Initial inertia weight
     'endInertia', 0.4,          % Final inertia weight
     'endInertiaIter', 2000,     % Iteration to reach endInertia
@@ -120,10 +129,6 @@ returnData.totalFuncEvals    % Total fitness function evaluations
 returnData.allBestFit        % (outputLevel >= 1) Best fitness per iteration
 returnData.allBestLoc        % (outputLevel >= 2) Best location per iteration
 ```
-
-**Coordinate Systems**:
-- **Standardized coordinates**: Values in [0,1] used internally by PSO
-- **Real coordinates**: Actual parameter values, converted using fitness function
 
 ### 2. `crcbqcpso` - Quadratic Chirp PSO
 
@@ -148,7 +153,7 @@ inParams = struct(...
 
 **Signal Model**: `s(t) = A*sin(2π(a1*t + a2*t² + a3*t³))`
 - PSO optimizes the phase coefficients [a1, a2, a3]
-- Amplitude A is optimized implicitly: the fitness function normalizes the signal and uses the negative squared inner product with the data, which maximizes correlation (matched filtering)
+- The fitness function is the negative squared inner product between the normalized signal and data (matched filtering)
 
 **Output Structure**:
 ```matlab
@@ -161,7 +166,7 @@ outResults.bestQcCoefs       % Best coefficients [a1, a2, a3]
 
 ### 3. `crcbregsplpso` - Regression Spline PSO
 
-**Purpose**: B-spline regression with PSO-optimized breakpoint locations.
+**Purpose**: B-spline regression with PSO-optimized knot locations.
 
 **Syntax**:
 ```matlab
@@ -174,8 +179,8 @@ inParams = struct(...
     'dataX', timeStamps,        % Time stamps
     'dataY', dataVector,        % Data values
     'nBrks', nBreakpoints,      % Number of breakpoints to optimize
-    'rminVal', 0.0,             % Minimum standardized breakpoint value (note: uses 'Val' suffix)
-    'rmaxVal', 1.0              % Maximum standardized breakpoint value (note: uses 'Val' suffix)
+    'rmin', 0.0,             % Minimum standardized knot value 
+    'rmax', 1.0              % Maximum standardized knot value 
 );
 ```
 
@@ -836,7 +841,9 @@ rng(12345);      % Specific seed
 
 [1] Kennedy, J., & Eberhart, R. (1995). Particle swarm optimization. *Proceedings of ICNN'95 - International Conference on Neural Networks*, 1942-1948. IEEE.
 
-[2] Shi, Y., & Eberhart, R. (1998). A modified particle swarm optimizer. *1998 IEEE International Conference on Evolutionary Computation Proceedings. IEEE World Congress on Computational Intelligence*, 69-73. IEEE.
+[2] Bratton, D., & Kennedy, J. (2007). Defining a standard for particle swarm optimization. 2007 IEEE Swarm Intelligence Symposium, 120–127. IEEE.
+
+[3] Shi, Y., & Eberhart, R. (1998). A modified particle swarm optimizer. *1998 IEEE International Conference on Evolutionary Computation Proceedings. IEEE World Congress on Computational Intelligence*, 69-73. IEEE.
 
 ## Additional Resources
 
