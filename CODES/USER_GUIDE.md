@@ -12,12 +12,14 @@
 
 ## Introduction
 
-This repository contains MATLAB implementations of Particle Swarm Optimization (PSO) algorithms for statistical regression problems, specifically focused on:
-- Quadratic chirp signal regression
-- B-spline regression with PSO-optimized breakpoints
-- General-purpose PSO optimization
+This repository contains MATLAB implementations of Particle Swarm Optimization (PSO) and some of its applications to illustrative statistical regression problems, namely,
 
-The code was developed for the course "Swarm intelligence methods for statistical regression" delivered at the BigDat 2019 international winter school.
+- Quadratic chirp signal regression,
+- B-spline regression with PSO-optimized knots,
+  
+and a benchmark fitness function.
+
+The code was developed for the book ["Swarm Intelligence Methods for Statistical Regression"](https://www.amazon.com/Swarm-Intelligence-Methods-Statistical-Regression/dp/0367670372), which was based on courses delivered at the BigDat 2017 (Bari, Italy) and 2019 (Cambridge, UK) international winter schools.
 
 ### What is PSO?
 
