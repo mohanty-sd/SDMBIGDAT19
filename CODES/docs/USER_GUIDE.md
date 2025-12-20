@@ -55,6 +55,7 @@ The following MATLAB toolboxes are required to run all features of this code:
    ```
 
 ## Quick Start
+See [CodeList.pdf](docs/CodeList.pdf) for a list of functions with brief documentation.
 
 ### Running Your First PSO Optimization
 
@@ -85,9 +86,6 @@ disp(['Best location: ', num2str(psoOut.bestLocation)]);
 Most functions in this codebase follow the naming pattern `crcb<functionname>.m`, where the prefix "crcb" stands for "CRC book" and refers to the textbook upon which the course is based. Functions without this prefix are borrowed from external libraries and have been ported here to create a self-contained package.
 
 Test scripts with filenames following the pattern `test_crcb<name>.m` reproduce examples from the book and demonstrate how to use the provided functions.
-
-### List of Core Functions
-See [CodeList.pdf](docs/CodeList.pdf) for a list of functions with brief documentation.
 
 ### 1. `crcbpso` - Main PSO Implementation
 
