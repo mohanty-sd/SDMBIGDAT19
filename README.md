@@ -3,4 +3,4 @@ Material related to the course "Swarm intelligence methods for statistical regre
 
 [![View SDMBIGDAT19 on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/75565-sdmbigdat19)
 
-See [CODES/docs/USER_GUIDE.md](CODES/docs/USER_GUIDE.md) for the user guide.
+See [CODES/docs/USER_GUIDE_MATLAB.md](CODES/docs/USER_GUIDE_MATLAB.md) for the user guide.

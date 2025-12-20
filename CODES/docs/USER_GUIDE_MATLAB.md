@@ -45,9 +45,9 @@ The following MATLAB toolboxes are required to run all features of this code:
 
 ### Installation Steps
 1. Clone or download this repository
-2. Add the `CODES` directory to your MATLAB path:
+2. Add the `MatlabCodes` directory to your MATLAB path:
    ```matlab
-   addpath('/path/to/SDMBIGDAT19/CODES');
+   addpath('/path/to/SDMBIGDAT19/CODES/MatlabCodes');
    ```
 3. Verify installation by running:
    ```matlab
