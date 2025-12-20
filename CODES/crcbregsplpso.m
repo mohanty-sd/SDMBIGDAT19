@@ -9,7 +9,7 @@ function outResults = crcbregsplpso(inParams, psoParams, nRuns)
 % 'dataY': The data vector (a uniformly sampled time series).
 % 'dataX': The time stamps of the data samples.
 % 'nBrks': The number of breakpoints to optimize.
-% 'rminVal','rmaxVal': The minimum and maximum values for the standardized
+% 'rmin','rmax': The minimum and maximum values for the standardized
 %                      representation of each breakpoint.
 %The fields of O are:
 % 'allRunsOutput': An N element struct array containing results from each PSO
@@ -32,8 +32,8 @@ dataY = inParams.dataY;
 nbrks4Srch = inParams.nBrks;
 nIntBrks = nbrks4Srch - 2;
 nBsplines = nIntBrks - 2;
-rminVal = inParams.rminVal;
-rmaxVal = inParams.rmaxVal;
+rminVal = inParams.rmin;
+rmaxVal = inParams.rmax;
 
 nSamples = length(dataY);
 
