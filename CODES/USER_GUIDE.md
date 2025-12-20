@@ -9,6 +9,7 @@
 6. [Creating Custom Fitness Functions](#creating-custom-fitness-functions)
 7. [Advanced Usage](#advanced-usage)
 8. [Troubleshooting](#troubleshooting)
+9. [References](#references)
 
 ## Introduction
 
@@ -21,7 +22,7 @@ The code was developed for the course "Swarm intelligence methods for statistica
 
 ### What is PSO?
 
-Particle Swarm Optimization is a computational method that optimizes a problem by iteratively improving candidate solutions (particles) with regard to a given measure of quality (fitness function). The particles move through the search space influenced by their own best-known position and the best-known positions of their neighbors.
+Particle Swarm Optimization is a computational method that optimizes a problem by iteratively improving candidate solutions (particles) with regard to a given measure of quality (fitness function) [1]. The particles move through the search space influenced by their own best-known position and the best-known positions of their neighbors.
 
 ## Installation and Prerequisites
 
@@ -76,7 +77,7 @@ disp(['Best location: ', num2str(psoOut.bestLocation)]);
 
 ### 1. `crcbpso` - Main PSO Implementation
 
-**Purpose**: Local-best (lbest) PSO minimizer with ring topology neighborhood.
+**Purpose**: Local-best (lbest) PSO minimizer with ring topology neighborhood [1].
 
 **Syntax**:
 ```matlab
@@ -597,7 +598,7 @@ end
 - **Default**: Start at 0.9, end at 0.4
 - High inertia → exploration (early iterations)
 - Low inertia → exploitation (late iterations)
-- Linear decay: `w(t) = max(startInertia - ((startInertia - endInertia) / (endInertiaIter - 1)) * (t - 1), endInertia)`
+- Linear decay [2]: `w(t) = max(startInertia - ((startInertia - endInertia) / (endInertiaIter - 1)) * (t - 1), endInertia)`
   - Note: `endInertiaIter` may be different from `maxSteps` if specified separately
   - The formula uses `(endInertiaIter - 1)` in the denominator for proper interpolation
 
@@ -829,13 +830,13 @@ rng(12345);      % Specific seed
 4. Use broader search space
 5. Seed particles near known good solutions
 
-## References and Further Reading
+## References
 
-### Key Concepts
+[1] Kennedy, J., & Eberhart, R. (1995). Particle swarm optimization. *Proceedings of ICNN'95 - International Conference on Neural Networks*, 4, 1942-1948. IEEE.
 
-- **PSO Algorithm**: Kennedy, J., & Eberhart, R. (1995). "Particle swarm optimization."
-- **Ring Topology**: Local-best PSO with neighborhood structure
-- **Inertia Weight**: Shi, Y., & Eberhart, R. (1998). "Parameter selection in particle swarm optimization."
+[2] Shi, Y., & Eberhart, R. (1998). A modified particle swarm optimizer. *1998 IEEE International Conference on Evolutionary Computation Proceedings. IEEE World Congress on Computational Intelligence*, 69-73. IEEE.
+
+## Additional Resources
 
 ### Related Documentation
 
