@@ -21,7 +21,7 @@ This repository contains MATLAB implementations of Particle Swarm Optimization (
   
 and a benchmark fitness function.
 
-The code was developed for the book ["Swarm Intelligence Methods for Statistical Regression"](https://www.amazon.com/Swarm-Intelligence-Methods-Statistical-Regression/dp/0367670372), which was based on courses delivered at the BigDat 2017 (Bari, Italy) and 2019 (Cambridge, UK) international winter schools.
+The code was developed for the textbook ["Swarm Intelligence Methods for Statistical Regression"](https://www.amazon.com/Swarm-Intelligence-Methods-Statistical-Regression/dp/0367670372), which was based on courses delivered at the BigDat 2017 (Bari, Italy) and 2019 (Cambridge, UK) international winter schools.
 
 ### What is PSO?
 
@@ -80,6 +80,11 @@ disp(['Best location: ', num2str(psoOut.bestLocation)]);
 ```
 
 ## Core Functions
+
+### Naming Conventions
+Most functions in this codebase follow the naming pattern `crcb<functionname>.m`, where the prefix "crcb" stands for "CRC book" and refers to the textbook upon which the course is based. Functions without this prefix are borrowed from external libraries and have been ported here to create a self-contained package.
+
+Test scripts with filenames following the pattern `test_crcb<name>.m` reproduce examples from the book and demonstrate how to use the provided functions.
 
 ### 1. `crcbpso` - Main PSO Implementation
 
@@ -653,7 +658,8 @@ end
 
 ### Related Documentation
 
-- See lecture slides in the `SLIDES` directory of this repository for theoretical background
+- See lecture slides in the `SLIDES` directory of this repository for theoretical background.
+- Use Matlab's `help` command to get high level documentation of each function's interface. In addition to the help, each function is documented internally.
 
 ### Contact and Support
 
