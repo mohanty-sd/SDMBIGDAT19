@@ -104,7 +104,7 @@ def test_pso_basic():
     plt.grid(True)
     
     plt.tight_layout()
-    plt.savefig('/home/runner/work/SDMBIGDAT19/SDMBIGDAT19/CODES/PythonCodes/test_pso_convergence.png', dpi=150)
+    plt.savefig('test_pso_convergence.png', dpi=150)
     print("Saved convergence plot to: test_pso_convergence.png")
     
     # If 2D, plot trajectory
@@ -190,7 +190,7 @@ def test_pso_2d():
     plt.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('/home/runner/work/SDMBIGDAT19/SDMBIGDAT19/CODES/PythonCodes/test_pso_trajectory_2d.png', dpi=150)
+    plt.savefig('test_pso_trajectory_2d.png', dpi=150)
     print("Saved trajectory plot to: test_pso_trajectory_2d.png")
     
     print("\n" + "="*60)

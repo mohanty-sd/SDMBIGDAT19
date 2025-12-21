@@ -178,8 +178,7 @@ def plot_results(time_vec, data, true_signal, cardinal_result, pso_result, true_
     axes[2].set_xlim([time_vec[0], time_vec[-1]])
     
     plt.tight_layout()
-    plt.savefig('/home/runner/work/SDMBIGDAT19/SDMBIGDAT19/CODES/PythonCodes/test_bspline_results.png', 
-                dpi=150)
+    plt.savefig('test_bspline_results.png', dpi=150)
     print("\nSaved results plot to: test_bspline_results.png")
     
     # Create zoomed-in view
@@ -201,8 +200,7 @@ def plot_results(time_vec, data, true_signal, cardinal_result, pso_result, true_
     ax.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('/home/runner/work/SDMBIGDAT19/SDMBIGDAT19/CODES/PythonCodes/test_bspline_zoomed.png', 
-                dpi=150)
+    plt.savefig('test_bspline_zoomed.png', dpi=150)
     print("Saved zoomed plot to: test_bspline_zoomed.png")
 
 

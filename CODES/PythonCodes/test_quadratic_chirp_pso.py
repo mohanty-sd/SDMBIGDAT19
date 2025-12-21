@@ -143,7 +143,7 @@ def plot_results(time_vec, data, results, true_coefs, signal_snr):
     axes[2].grid(True, alpha=0.3, axis='y')
     
     plt.tight_layout()
-    plt.savefig('/home/runner/work/SDMBIGDAT19/SDMBIGDAT19/CODES/PythonCodes/test_qc_pso_results.png', dpi=150)
+    plt.savefig('test_qc_pso_results.png', dpi=150)
     print("\nSaved results plot to: test_qc_pso_results.png")
     
     # Create a zoomed-in view of the signal
@@ -162,7 +162,7 @@ def plot_results(time_vec, data, results, true_coefs, signal_snr):
     ax.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('/home/runner/work/SDMBIGDAT19/SDMBIGDAT19/CODES/PythonCodes/test_qc_pso_zoomed.png', dpi=150)
+    plt.savefig('test_qc_pso_zoomed.png', dpi=150)
     print("Saved zoomed plot to: test_qc_pso_zoomed.png")
 
 

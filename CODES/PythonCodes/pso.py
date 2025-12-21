@@ -229,7 +229,7 @@ def pso(fitfunc: Callable[[np.ndarray, Dict[str, Any]], np.ndarray],
     # Main PSO loop
     for step in range(max_steps):
         # Evaluate fitness for all particles
-        if not boundary_cond:
+        if boundary_cond == '':
             # Invisible wall boundary condition
             fitness_vals = fitfunc(pop[:, coord_cols])
             # If fitness function returns tuple (fitness, real_coords), extract fitness
@@ -298,7 +298,7 @@ def pso(fitfunc: Callable[[np.ndarray, Dict[str, Any]], np.ndarray],
         pop[:, coord_cols] = pop[:, coord_cols] + pop[:, vel_cols]
         
         # Handle boundary conditions (invisible wall)
-        if not boundary_cond:
+        if boundary_cond == '':
             # Particles outside [0,1] get infinite fitness
             # They will be handled in the next fitness evaluation
             pass
