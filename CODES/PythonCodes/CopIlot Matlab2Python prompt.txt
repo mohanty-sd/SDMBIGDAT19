@@ -1,0 +1,66 @@
+You are tasked with translating a MATLAB-based Particle Swarm Optimization (PSO) codebase into **modular, well-documented Python code** that preserves the original functionality, structure, and design intent. The MATLAB code implements local-best (lbest) PSO with ring topology and applies it to regression problems: (1) quadratic chirp signal fitting and (2) B-spline regression with PSO-optimized knot locations.
+
+Use the attached documentation (`USER_GUIDE_MATLAB.pdf` and `CodeList_MATLAB.pdf`) as your primary reference. Below are your instructions:
+
+### 1. **Overall Architecture**
+- Replicate the modular structure of the MATLAB code:
+  - Core PSO engine (`crcbpso` → `pso.py`)
+  - Application-specific wrappers (`crcbqcpso` → `quadratic_chirp_pso.py`, `crcbregsplpso` → `bspline_regression_pso.py`)
+  - Utility functions (`s2rv`, `r2sv`, `crcbchkstdsrchrng`, etc.)
+  - Test scripts (e.g., `test_crcbpso.py`, `test_quadratic_chirp_pso.py`)
+- Use **standard scientific Python libraries**: NumPy, SciPy, Matplotlib. For B-spline functionality, use `scipy.interpolate.BSpline` or `make_interp_spline`—do **not** rely on MATLAB’s Curve Fitting Toolbox equivalents unless an open-source alternative exists.
+- For optional parallelization, use `concurrent.futures` or `multiprocessing`; do **not** assume a MATLAB Parallel Computing Toolbox analog. Provide a fallback to sequential execution.
+
+### 2. **Core PSO Engine (`pso.py`)**
+- Implement a function `pso(fitfunc, n_dim, pso_params=None, output_level=0, seed_matrix=None)` that:
+  - Accepts a **fitness function** name fitfunc that takes standardized coordinates (`x` ∈ [0,1]ⁿ) and a `params` dict that must contain `'rmin'` and `'rmax'`arrays in addition to other user-specified parameters for the fitness function. The PSO code does not look inside `params`. It just calls the fitness function with standarddzed coordinates. You should decide how best to implement this so that the PSO engine can accept any arbitrary fitness function created by the user. 
+  - Uses **standardized search space** [0,1]ᵈ internally; real coordinates are derived via helper functions.
+  - Supports all PSO parameters from the MATLAB version and their default values (defined inside crcbpso.m): `pop_size`, `max_steps`, `c1`, `c2`, `max_velocity`, inertia scheduling (`start_inertia`, `end_inertia`, `end_inertia_iter`), `nbrhd_sz`, and optional boundary handling.
+  - Returns a dictionary with keys: `best_location` (real coords using the fitness function's output), `best_fitness`, `total_func_evals`, and optionally `all_best_fit`, `all_best_loc` based on `output_level`.
+- Include helper functions:
+  - `standard_to_real(x_std, params)` ↔ `s2rv`
+  - `real_to_standard(x_real, params)` ↔ `r2sv`
+  - `check_standard_bounds(x_std)` ↔ `crcbchkstdsrchrng`
+
+### 3. **Fitness Function Interface**
+- All custom fitness functions must:
+  - Accept a 2D NumPy array `x_std` (rows = particles) and a `params` dict.
+  - Return a 1D array of fitness values (lower = better).
+  - Return a 2D NumPy array `x_real` (rows = particles) of un-standardized coordinates.
+  - Assign `np.inf` for out-of-bound particles (if using invisible-wall boundary condition).
+
+### 4. **Application Modules**
+- **Quadratic Chirp Regression** (`quadratic_chirp_pso.py`):
+  - Signal model: `s(t) = A * sin(2π(a1*t + a2*t² + a3*t³))`
+  - PSO optimizes `[a1, a2, a3]`; amplitude `A` is analytically maximized (matched filtering via inner product).
+  - Fitness = negative squared correlation between normalized signal and data.
+- **B-spline Regression** (`bspline_regression_pso.py`):
+  - PSO optimizes knot locations (breakpoints).
+  - For a given knot vector, fit B-spline coefficients via least squares (using `scipy.linalg.lstsq`).
+  - Return residual sum of squares as fitness.
+- Include non-PSO baseline: `cardinal_bspline_fit.py` with uniformly spaced knots.
+
+### 5. **Test Scripts**
+- Replicate all MATLAB test scripts as Python equivalents:
+  - `test_pso.py`: Rastrigin function, convergence plots, trajectory (2D only).
+  - `test_quadratic_chirp_pso.py`: synthetic signal + noise, multi-run PSO, overlay plots.
+  - `test_bspline_regression_pso.py`: compare PSO-optimized vs. uniform knots.
+- Use `matplotlib` for all visualizations.
+
+### 6. **Style & Best Practices**
+- Follow **PEP 8**.
+- Include **docstrings** (Google or NumPy style) for every public function.
+- Use **type hints**.
+- Add logging (optional) or print statements matching MATLAB’s verbosity levels.
+
+### 7. **Constraints & Notes**
+- Do **not** use MATLAB-specific constructs (e.g., `parfor`). Replace with Python-native alternatives.
+- The code must be **self-contained** except for standard scientific Python packages.
+- Preserve the **"Best-of-M-runs"** strategy for stochastic reliability.
+- Include a `README.md` summarizing usage, dependencies, and examples.
+
+Begin by generating the core PSO engine and helper utilities. Then proceed to application modules and test scripts. Confirm understanding before generating code.
+
+--- 
+
+This prompt gives Copilot clear architectural, functional, and stylistic direction while anchoring the task in your provided documentation. You can feed this directly into a Copilot Chat or agent interface.
