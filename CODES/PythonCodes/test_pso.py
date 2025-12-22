@@ -67,7 +67,7 @@ def test_pso_basic():
     print("Test 3: Overriding PSO parameters")
     print("="*60)
     pso_params = {
-        'max_steps': 3000,
+        'max_steps': 30000,
         'max_velocity': 0.9
     }
     print(f"Changing max_steps to: {pso_params['max_steps']}")
