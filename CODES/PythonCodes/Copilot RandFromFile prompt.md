@@ -85,8 +85,15 @@ def pso(fitfunc, n_dim, pso_params=None, output_level=0, seed_matrix=None,
 **Example implementation pattern**:
 ```python
 if rand_file_path is not None:
-    # Load random numbers from file
-    rand_numbers = np.loadtxt(rand_file_path)
+    # Load random numbers from file with error handling
+    try:
+        rand_numbers = np.loadtxt(rand_file_path)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Random number file not found: {rand_file_path}")
+    except PermissionError:
+        raise PermissionError(f"Permission denied reading file: {rand_file_path}")
+    except ValueError as e:
+        raise ValueError(f"Error parsing random number file {rand_file_path}: {e}")
     
     # Validate sufficient numbers are available
     expected_count = 2 * popsize * n_dim * (1 + max_steps)
@@ -151,7 +158,13 @@ def generate_quadratic_chirp_data(data_x, snr, qc_coefs, randn_file_path=None):
     sig_vec = generate_quadratic_chirp_signal(data_x, snr, qc_coefs)
     
     if randn_file_path is not None:
-        noise_data = np.loadtxt(randn_file_path)
+        try:
+            noise_data = np.loadtxt(randn_file_path)
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Noise file not found: {randn_file_path}")
+        except (PermissionError, ValueError) as e:
+            raise type(e)(f"Error reading noise file {randn_file_path}: {e}")
+        
         if len(noise_data) < n_samples:
             raise ValueError(
                 f"Noise file contains {len(noise_data)} values but "
@@ -215,6 +228,9 @@ totalNumbers = 2 * popsize * nDim * (1 + maxSteps);
 randNumbers = rand(totalNumbers, 1);
 
 % Save to file
+% Note: dlmwrite is deprecated in newer MATLAB versions
+% For MATLAB R2019a and newer, use writematrix instead:
+% writematrix(randNumbers, filename, 'FileType', 'text');
 dlmwrite(filename, randNumbers, 'precision', '%.16f');
 
 fprintf('Generated %d random numbers and saved to %s\n', totalNumbers, filename);
@@ -233,6 +249,9 @@ rng('default'); % Set seed for reproducibility
 randNumbers = randn(nSamples, 1);
 
 % Save to file
+% Note: dlmwrite is deprecated in newer MATLAB versions
+% For MATLAB R2019a and newer, use writematrix instead:
+% writematrix(randNumbers, filename, 'FileType', 'text');
 dlmwrite(filename, randNumbers, 'precision', '%.16f');
 
 fprintf('Generated %d Gaussian random numbers and saved to %s\n', nSamples, filename);
@@ -267,7 +286,7 @@ To verify Python code matches MATLAB output:
 
 ### 6. Documentation Updates
 
-Add a section to `USER_GUIDE_PYTHON.md`:
+Add a section to `CODES/docs/USER_GUIDE_PYTHON.md`:
 
 **"Reproducibility Testing and Validation"**
 - Explain the purpose of random file functionality
