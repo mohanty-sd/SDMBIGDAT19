@@ -87,11 +87,25 @@ def pso(fitfunc, n_dim, pso_params=None, output_level=0, seed_matrix=None,
 if rand_file_path is not None:
     # Load random numbers from file
     rand_numbers = np.loadtxt(rand_file_path)
+    
+    # Validate sufficient numbers are available
+    expected_count = 2 * popsize * n_dim * (1 + max_steps)
+    if len(rand_numbers) < expected_count:
+        raise ValueError(
+            f"Random file contains {len(rand_numbers)} numbers but "
+            f"{expected_count} are required for this PSO run"
+        )
+    
     rand_idx = 0
     
     def get_rand(shape):
         nonlocal rand_idx
         size = np.prod(shape)
+        if rand_idx + size > len(rand_numbers):
+            raise ValueError(
+                f"Insufficient random numbers in file. Needed {rand_idx + size}, "
+                f"but file only contains {len(rand_numbers)}"
+            )
         result = rand_numbers[rand_idx:rand_idx+size].reshape(shape)
         rand_idx += size
         return result
@@ -137,7 +151,13 @@ def generate_quadratic_chirp_data(data_x, snr, qc_coefs, randn_file_path=None):
     sig_vec = generate_quadratic_chirp_signal(data_x, snr, qc_coefs)
     
     if randn_file_path is not None:
-        noise = np.loadtxt(randn_file_path)[:n_samples]
+        noise_data = np.loadtxt(randn_file_path)
+        if len(noise_data) < n_samples:
+            raise ValueError(
+                f"Noise file contains {len(noise_data)} values but "
+                f"{n_samples} are required"
+            )
+        noise = noise_data[:n_samples]
     else:
         noise = np.random.randn(n_samples)
     
@@ -259,9 +279,38 @@ Add a section to `USER_GUIDE_PYTHON.md`:
 
 **Order of random number consumption**:
 - The order in which random numbers are consumed must exactly match MATLAB
-- MATLAB's `rand(m, n)` generates numbers in **column-major order**
-- NumPy's default is **row-major order**
-- When loading from file, reshape appropriately to maintain compatibility
+- MATLAB's `rand(m, n)` generates numbers in **column-major order** (Fortran order)
+- NumPy's default is **row-major order** (C order)
+- When loading from file and reshaping, use order='F' to match MATLAB
+
+**Example of handling order difference**:
+```python
+# MATLAB: rand(popsize, nDim) fills column-by-column
+# To match in Python when reading from file:
+rand_values = rand_numbers[rand_idx:rand_idx+popsize*n_dim]
+# Reshape with Fortran order to match MATLAB's column-major layout
+result = rand_values.reshape((popsize, n_dim), order='F')
+rand_idx += popsize * n_dim
+```
+
+**Testing the order**:
+To verify order matches MATLAB, create a small test:
+```matlab
+% MATLAB
+rng('default');
+A = rand(2, 3)
+% Output: each column filled first
+```
+
+```python
+# Python - incorrect (default C order)
+np.random.seed(0)
+A = np.random.rand(2, 3)  # Row-major, won't match MATLAB
+
+# Python - correct (Fortran order when loading from file)
+values = load_from_file()  # [v1, v2, v3, v4, v5, v6]
+A = values.reshape((2, 3), order='F')  # Column-major, matches MATLAB
+```
 
 **Precision**:
 - Save random numbers with sufficient precision (at least 16 decimal places)
