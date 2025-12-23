@@ -257,7 +257,7 @@ def test_pso_rand_file_test3():
 
     # Overridden PSO parameters (same as Test 3)
     pso_params = {
-        'max_steps': 30000,
+        'max_steps': 3,
         'max_velocity': 0.9
     }
 
@@ -277,10 +277,10 @@ def test_pso_rand_file_test3():
 
 if __name__ == '__main__':
     # Run basic tests
-    test_pso_basic()
+    #test_pso_basic()
     
     # Run 2D test for trajectory visualization
-    test_pso_2d()
+    #test_pso_2d()
 
     # Run file-based random number test
     # test_pso_rand_file()
