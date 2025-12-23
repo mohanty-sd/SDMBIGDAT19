@@ -86,7 +86,8 @@ def pso(fitfunc: Callable[[np.ndarray, Dict[str, Any]], np.ndarray],
         n_dim: int,
         pso_params: Optional[Dict[str, Any]] = None,
         output_level: int = 0,
-        seed_matrix: Optional[np.ndarray] = None) -> Dict[str, Any]:
+    seed_matrix: Optional[np.ndarray] = None,
+    rand_file: str = "") -> Dict[str, Any]:
     """
     Local-best (lbest) PSO minimizer with ring topology.
     
@@ -114,6 +115,11 @@ def pso(fitfunc: Callable[[np.ndarray, Dict[str, Any]], np.ndarray],
                      1: Adds 'all_best_fit' (fitness history)
                      2: Adds 'all_best_loc' (location history)
         seed_matrix: Optional array to seed initial particle locations (standardized coords)
+        rand_file: Optional path to a text file containing a single column of
+               floats in [0, 1). When provided, random draws are consumed
+               sequentially from this file instead of np.random; when empty
+               (default), np.random is used. The file is assumed to have
+               sufficient values for the entire PSO run.
     
     Returns:
         Dictionary with keys:
@@ -142,6 +148,22 @@ def pso(fitfunc: Callable[[np.ndarray, Dict[str, Any]], np.ndarray],
     end_inertia_iter = max_steps
     boundary_cond = ''
     nbrhd_sz = 3
+
+    if rand_file:
+        rand_seq = np.loadtxt(rand_file)
+        rand_index = [0]
+
+        def rand(shape):
+            target_shape = shape if isinstance(shape, tuple) else (shape,)
+            count = int(np.prod(target_shape))
+            start = rand_index[0]
+            end = start + count
+            rand_index[0] = end
+            return rand_seq[start:end].reshape(target_shape)
+    else:
+        def rand(shape):
+            target_shape = shape if isinstance(shape, tuple) else (shape,)
+            return np.random.rand(*target_shape)
     
     # Override defaults with user-provided parameters
     if pso_params is not None:
@@ -199,7 +221,7 @@ def pso(fitfunc: Callable[[np.ndarray, Dict[str, Any]], np.ndarray],
     lbest_cols = slice(3*n_dim + 4, 4*n_dim + 4)
     
     # Initialize particle positions randomly in [0, 1]
-    pop[:, coord_cols] = np.random.rand(pop_size, n_dim)
+    pop[:, coord_cols] = rand((pop_size, n_dim))
     
     # Seed initial locations if provided
     if seed_matrix is not None:
@@ -209,7 +231,7 @@ def pso(fitfunc: Callable[[np.ndarray, Dict[str, Any]], np.ndarray],
         pop[:n_row_seed, :n_col_seed] = seed_matrix[:n_row_seed, :n_col_seed]
     
     # Initialize velocities
-    pop[:, vel_cols] = np.random.rand(pop_size, n_dim) - pop[:, coord_cols]
+    pop[:, vel_cols] = rand((pop_size, n_dim)) - pop[:, coord_cols]
     
     # Initialize personal bests
     pop[:, pbest_cols] = pop[:, coord_cols].copy()
@@ -283,8 +305,8 @@ def pso(fitfunc: Callable[[np.ndarray, Dict[str, Any]], np.ndarray],
         pop[:, inertia_col] = inertia
         
         # Update velocities
-        r1 = np.random.rand(pop_size, n_dim)
-        r2 = np.random.rand(pop_size, n_dim)
+        r1 = rand((pop_size, n_dim))
+        r2 = rand((pop_size, n_dim))
         
         cognitive = c1 * r1 * (pop[:, pbest_cols] - pop[:, coord_cols])
         social = c2 * r2 * (pop[:, lbest_cols] - pop[:, coord_cols])

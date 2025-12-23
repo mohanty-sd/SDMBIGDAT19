@@ -8,6 +8,7 @@ Author: Converted from MATLAB code by Soumya D. Mohanty
 
 import numpy as np
 import matplotlib.pyplot as plt
+from pathlib import Path
 from pso import pso, get_default_pso_params
 from fitness_test import rastrigin_fitness
 
@@ -198,11 +199,93 @@ def test_pso_2d():
     print("="*60)
 
 
+def test_pso_rand_file():
+    """Test PSO using random numbers loaded from a file."""
+    print("\n" + "="*60)
+    print("Testing PSO with random numbers from file")
+    print("="*60)
+
+    n_dim = 2
+    rmin = -5.0
+    rmax = 5.0
+
+    ff_params = {
+        'rmin': np.full(n_dim, rmin),
+        'rmax': np.full(n_dim, rmax)
+    }
+
+    def fit_func_handle(x):
+        return rastrigin_fitness(x, ff_params)
+
+    pso_params = {
+        'max_steps': 5,
+        'pop_size': 4
+    }
+
+    rand_file_path = Path(__file__).parent / "random_numbers.txt"
+    np.random.seed(123)
+    np.savetxt(rand_file_path, np.random.rand(200))
+
+    try:
+        pso_out = pso(fit_func_handle, n_dim, pso_params, rand_file=str(rand_file_path))
+        assert 'best_fitness' in pso_out
+        assert pso_out['best_location'].shape == (n_dim,)
+        print("PSO completed successfully using file-based random numbers")
+    finally:
+        if rand_file_path.exists():
+            rand_file_path.unlink()
+
+
+def test_pso_rand_file_test3():
+    """Use existing random_numbers.txt with Test 3 PSO params."""
+    print("\n" + "="*60)
+    print("Test 3b: PSO with rand_file and overridden params")
+    print("="*60)
+
+    # Problem setup matching Test 3
+    n_dim = 20
+    rmin = -10.0
+    rmax = 10.0
+
+    ff_params = {
+        'rmin': np.full(n_dim, rmin),
+        'rmax': np.full(n_dim, rmax)
+    }
+
+    def fit_func_handle(x):
+        return rastrigin_fitness(x, ff_params)
+
+    # Overridden PSO parameters (same as Test 3)
+    pso_params = {
+        'max_steps': 30000,
+        'max_velocity': 0.9
+    }
+
+    # Use the pre-existing random_numbers.txt in the same folder
+    rand_file_path = Path(__file__).parent / "random_numbers.txt"
+    print(f"Using random file: {rand_file_path}")
+
+    # Run PSO with file-backed random numbers
+    pso_out = pso(fit_func_handle, n_dim, pso_params, output_level=2, rand_file=str(rand_file_path))
+
+    # Report summary
+    print(f"Best fitness: {pso_out['best_fitness']:.6f}")
+    _, real_coord = fit_func_handle(pso_out['best_location'].reshape(1, -1))
+    print(f"Best location (first 5 coords): {real_coord[0, :5]}")
+    print(f"Total function evaluations: {pso_out['total_func_evals']}")
+
+
 if __name__ == '__main__':
     # Run basic tests
     test_pso_basic()
     
     # Run 2D test for trajectory visualization
     test_pso_2d()
+
+    # Run file-based random number test
+    # test_pso_rand_file()
+    
+    # Run Test 3 variant using the existing random_numbers.txt
+    test_pso_rand_file_test3()
     
     print("\nAll tests completed!")
