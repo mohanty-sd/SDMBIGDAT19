@@ -9,6 +9,7 @@ Author: Converted from MATLAB code by Soumya D. Mohanty
 """
 
 import numpy as np
+import os
 from typing import Callable, Dict, Optional, Any
 
 
@@ -159,11 +160,14 @@ def pso(fitfunc: Callable[[np.ndarray, Dict[str, Any]], np.ndarray],
             start = rand_index[0]
             end = start + count
             rand_index[0] = end
-            return rand_seq[start:end].reshape(target_shape)
+            # Always reshape in column-major order
+            return rand_seq[start:end].reshape(target_shape, order='F')
     else:
         def rand(shape):
             target_shape = shape if isinstance(shape, tuple) else (shape,)
-            return np.random.rand(*target_shape)
+            flat = np.random.rand(int(np.prod(target_shape)))
+            # Always reshape in column-major order
+            return flat.reshape(target_shape, order='F')
     
     # Override defaults with user-provided parameters
     if pso_params is not None:
@@ -184,6 +188,14 @@ def pso(fitfunc: Callable[[np.ndarray, Dict[str, Any]], np.ndarray],
         boundary_cond = pso_params.get('boundary_cond', boundary_cond)
         nbrhd_sz = pso_params.get('nbrhd_sz', nbrhd_sz)
     
+    # Debug log file setup: uncomment this block to clear tmp.txt before a run
+    # try:
+    #     if os.path.exists('tmp.txt'):
+    #         open('tmp.txt', 'w').close()
+    # except Exception:
+    #     # Silently ignore file I/O issues to not interrupt optimization
+    #     pass
+
     # Ensure minimum neighborhood size
     nbrhd_sz = max(nbrhd_sz, 3)
     
@@ -207,7 +219,7 @@ def pso(fitfunc: Callable[[np.ndarray, Dict[str, Any]], np.ndarray],
     # Initialize particle swarm
     # Columns store: position, velocity, pbest, fitness_pbest, fitness_current,
     # fitness_lbest, inertia, local_best_location
-    n_cols_pop = n_dim * 5 + 3  # position, velocity, pbest, lbest_loc + 3 fitness values + inertia
+    n_cols_pop = n_dim * 4 + 4  # position, velocity, pbest, lbest_loc + 3 fitness values + inertia
     pop = np.zeros((pop_size, n_cols_pop))
     
     # Define column indices
@@ -250,6 +262,14 @@ def pso(fitfunc: Callable[[np.ndarray, Dict[str, Any]], np.ndarray],
     
     # Main PSO loop
     for step in range(max_steps):
+        # Debug logging: uncomment this block to write the swarm matrix to tmp.txt each step
+        # try:
+        #     with open('tmp.txt', 'a') as f:
+        #         np.savetxt(f, pop, fmt='%.6f')
+        #         # f.write('===================\n')
+        # except Exception:
+        #     # Silently ignore file I/O issues to not interrupt optimization
+        #     pass
         # Evaluate fitness for all particles
         if boundary_cond == '':
             # Invisible wall boundary condition
@@ -270,6 +290,13 @@ def pso(fitfunc: Callable[[np.ndarray, Dict[str, Any]], np.ndarray],
         pop[improved, pbest_cols] = pop[improved, coord_cols]
         pop[improved, fit_pbest_col] = fitness_vals[improved]
         
+        # Update global best
+        current_best_idx = np.argmin(pop[:, fit_current_col])
+        current_best_fitness = pop[current_best_idx, fit_current_col]
+        if current_best_fitness < gbest_val:
+            gbest_val = current_best_fitness
+            gbest_loc = pop[current_best_idx, coord_cols].copy()
+        
         # Find local bests in ring topology neighborhoods
         for i in range(pop_size):
             # Define neighborhood indices (ring topology)
@@ -278,52 +305,49 @@ def pso(fitfunc: Callable[[np.ndarray, Dict[str, Any]], np.ndarray],
                 nbr_idx = (i + j) % pop_size
                 nbr_indices.append(nbr_idx)
             
-            # Find best in neighborhood
-            nbr_fitness = pop[nbr_indices, fit_pbest_col]
+            # Find best in neighborhood (by current fitness)
+            nbr_fitness = pop[nbr_indices, fit_current_col]
             best_nbr_idx = nbr_indices[np.argmin(nbr_fitness)]
-            pop[i, lbest_cols] = pop[best_nbr_idx, pbest_cols]
-            pop[i, fit_lbest_col] = pop[best_nbr_idx, fit_pbest_col]
+            best_nbr_fit = pop[best_nbr_idx, fit_current_col]
+            # Update local best only if it improves upon stored lbest
+            if best_nbr_fit < pop[i, fit_lbest_col]:
+                pop[i, lbest_cols] = pop[best_nbr_idx, coord_cols]
+                pop[i, fit_lbest_col] = best_nbr_fit
         
-        # Update global best
-        current_best_idx = np.argmin(pop[:, fit_pbest_col])
-        current_best_fitness = pop[current_best_idx, fit_pbest_col]
-        if current_best_fitness < gbest_val:
-            gbest_val = current_best_fitness
-            gbest_loc = pop[current_best_idx, pbest_cols].copy()
-        
+       
         # Store history if requested
         if output_level >= 1:
             return_data['all_best_fit'][step] = gbest_val
         if output_level >= 2:
             return_data['all_best_loc'][step, :] = gbest_loc
         
-        # Update inertia weight (linear decrease)
-        if step < end_inertia_iter:
-            inertia = start_inertia - (start_inertia - end_inertia) * step / end_inertia_iter
+        # Update inertia weight to match MATLAB schedule
+        if end_inertia_iter is not None and end_inertia_iter > 1 and step < end_inertia_iter:
+            inertia = max(
+                start_inertia - ((start_inertia - end_inertia) / (end_inertia_iter - 1)) * step,
+                end_inertia,
+            )
         else:
             inertia = end_inertia
         pop[:, inertia_col] = inertia
         
-        # Update velocities
-        r1 = rand((pop_size, n_dim))
-        r2 = rand((pop_size, n_dim))
-        
-        cognitive = c1 * r1 * (pop[:, pbest_cols] - pop[:, coord_cols])
-        social = c2 * r2 * (pop[:, lbest_cols] - pop[:, coord_cols])
-        
-        pop[:, vel_cols] = (inertia * pop[:, vel_cols] + cognitive + social)
-        
-        # Limit velocities
-        pop[:, vel_cols] = np.clip(pop[:, vel_cols], -max_velocity, max_velocity)
+        # Update velocities per particle (matching MATLAB code)
+        for k in range(pop_size):
+            chi1 = np.diag(rand(n_dim))
+            chi2 = np.diag(rand(n_dim))
+            
+            cognitive = c1 * (pop[k, pbest_cols] - pop[k, coord_cols]) @ chi1
+            social = c2 * (pop[k, lbest_cols] - pop[k, coord_cols]) @ chi2
+            
+            pop[k, vel_cols] = inertia * pop[k, vel_cols] + cognitive + social
+            
+            # Limit velocities
+            pop[k, vel_cols] = np.clip(pop[k, vel_cols], -max_velocity, max_velocity)
         
         # Update positions
         pop[:, coord_cols] = pop[:, coord_cols] + pop[:, vel_cols]
+
         
-        # Handle boundary conditions (invisible wall)
-        if boundary_cond == '':
-            # Particles outside [0,1] get infinite fitness
-            # They will be handled in the next fitness evaluation
-            pass
     
     # Prepare final output
     return_data['best_fitness'] = gbest_val

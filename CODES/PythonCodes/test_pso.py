@@ -257,7 +257,7 @@ def test_pso_rand_file_test3():
 
     # Overridden PSO parameters (same as Test 3)
     pso_params = {
-        'max_steps': 3,
+        'max_steps': 300,
         'max_velocity': 0.9
     }
 
@@ -271,19 +271,19 @@ def test_pso_rand_file_test3():
     # Report summary
     print(f"Best fitness: {pso_out['best_fitness']:.6f}")
     _, real_coord = fit_func_handle(pso_out['best_location'].reshape(1, -1))
-    print(f"Best location (first 5 coords): {real_coord[0, :5]}")
+    print(f"Best location: {real_coord[0, :n_dim]}")
     print(f"Total function evaluations: {pso_out['total_func_evals']}")
 
 
 if __name__ == '__main__':
     # Run basic tests
-    #test_pso_basic()
+    test_pso_basic()
     
     # Run 2D test for trajectory visualization
-    #test_pso_2d()
+    test_pso_2d()
 
     # Run file-based random number test
-    # test_pso_rand_file()
+    test_pso_rand_file()
     
     # Run Test 3 variant using the existing random_numbers.txt
     test_pso_rand_file_test3()
