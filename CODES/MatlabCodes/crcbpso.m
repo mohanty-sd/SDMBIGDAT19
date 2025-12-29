@@ -236,7 +236,9 @@ pop(:,partInertiaCols)=0;
 pop(:,partFitEvalsCols)=0;
 
 %Start PSO iterations ...
+% tmpFileID = fopen('tmp.txt','w');
 for lpc_steps=1:maxSteps
+    % fprintf(tmpFileID,[repmat('%f ',1,nColsPop),' \n'], pop.');
     %Evaluate particle fitnesses under ...
     if isempty(bndryCond)
         %Invisible wall boundary condition
@@ -309,7 +311,6 @@ for lpc_steps=1:maxSteps
         pop(k,partCoordCols)=pop(k,partCoordCols)+pop(k,partVelCols);
         if any(pop(k,partCoordCols)> 1 | ...
                 pop(k,partCoordCols)< 0)
-            pop(k,partFitCurrCols)= inf;
             pop(k,partFlagFitEvalCols)= 0;
         else
             pop(k,partFlagFitEvalCols)=1;
@@ -328,6 +329,7 @@ for lpc_steps=1:maxSteps
         end
     end
 end
+% fclose(tmpFileID);
 
 actualEvaluations = sum(pop(:,partFitEvalsCols));
 
