@@ -2,7 +2,16 @@
 
 ## Project Overview
 
-This document summarizes the successful conversion of MATLAB Particle Swarm Optimization (PSO) code to Python, as requested in `CopIlot Matlab2Python prompt.txt`.
+This document summarizes the successful conversion of MATLAB Particle Swarm Optimization (PSO) code to Python by GitHub CoPilot. The implementation replicates all core functionalities of the original MATLAB code, including: 
+- Core PSO engine with local-best topology
+- Standardized coordinate handling
+- Multiple benchmark fitness functions (Rastrigin, Quadratic Chirp, B-spline Regression)
+- Application wrappers for multi-run optimization
+- Comprehensive documentation and user guide
+- Thorough testing scripts with visualizations
+
+### Performance Note: Python vs MATLAB Discrepancies 
+The processing implemented in the Python version is functionally equivalent to the MATLAB version, but differs numerically even when fed with the same random number stream (see test_pso.py--> test_pso_rand_file_test3() for details). The agreement with the Matlab version is very close for moderate number of iterations (e.g., 300) but diverges more for large number of iterations (e.g., 2000). The origin of this discrepancy is not fully understood. In general, the Python version is slightly less performant than the MATLAB version for the same number of iterations. Users should be aware of this discrepancy when comparing results between the two implementations.
 
 ## Completed Deliverables
 
@@ -14,7 +23,6 @@ This document summarizes the successful conversion of MATLAB Particle Swarm Opti
   - Configurable parameters (population size, iterations, inertia, etc.)
   - Optional history tracking for convergence analysis
   - Particle seeding support
-- **Size**: 12.5 KB, ~340 lines
 
 ### 2. Helper Utilities
 - `standard_to_real()`: Convert [0,1] coords to real search space
@@ -41,7 +49,7 @@ This document summarizes the successful conversion of MATLAB Particle Swarm Opti
 - Uses CL (C. Leung) parameterization scheme
 - Breakpoint healing to ensure minimum spacing
 - Least-squares coefficient fitting
-- ~9 KB, handles multiple particles efficiently
+- Handles multiple particles efficiently
 
 ### 4. Application Wrappers
 
@@ -90,7 +98,7 @@ This document summarizes the successful conversion of MATLAB Particle Swarm Opti
 ### 7. Documentation
 
 #### User Guide (`USER_GUIDE_PYTHON.md`)
-- **Size**: 15 KB, comprehensive documentation
+- Comprehensive documentation
 - Mirrors MATLAB guide structure
 - Sections:
   - Installation and prerequisites
@@ -222,10 +230,10 @@ def fitness(x_std, params):
 ## File Statistics
 
 ### Code Files
-- Total: 10 Python modules
-- Lines of code: ~2,000 (excluding tests)
-- Test scripts: 3 files, ~20 KB
-- Documentation: 2 files, ~17 KB
+- Total: 10 Python modules (1,376 lines)
+- Test scripts: 3 files (675 lines)
+- Documentation: 2 files (README + User Guide)
+- Total project: 2,049 lines of code
 
 ### Generated Content
 - PNG plots: 6 visualization files
@@ -266,7 +274,6 @@ These were not required but could be added:
 ## Conclusion
 
 This implementation successfully converts all core MATLAB PSO functionality to Python while:
-- Maintaining algorithmic equivalence
 - Following Python best practices
 - Providing comprehensive documentation
 - Including thorough testing
@@ -278,8 +285,7 @@ The code is production-ready, well-documented, and suitable for educational and 
 ---
 
 **Files Created**: 14 new files (10 modules + 3 tests + 1 doc)  
-**Total Code**: ~2,500 lines  
-**Documentation**: ~17 KB  
+**Total Code**: 2,049 lines  
 **Security**: 0 vulnerabilities  
 **Test Coverage**: All major features validated  
 
