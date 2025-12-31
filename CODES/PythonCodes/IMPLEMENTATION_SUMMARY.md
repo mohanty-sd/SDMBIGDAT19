@@ -13,6 +13,8 @@ This document summarizes the successful conversion of MATLAB Particle Swarm Opti
 ### Performance Note: Python vs MATLAB Discrepancies 
 The processing implemented in the Python version is functionally equivalent to the MATLAB version, but differs numerically even when fed with the same random number stream (see test_pso.py--> test_pso_rand_file_test3() for details). The agreement with the Matlab version is very close for moderate number of iterations (e.g., 300) but diverges more for large number of iterations (e.g., 2000). The origin of this discrepancy is not fully understood. In general, the Python version is slightly less performant than the MATLAB version for the same number of iterations. Users should be aware of this discrepancy when comparing results between the two implementations.
 
+Another discrepancy in in the CoPilot-generated code for PSO-based B-spline regression (fitness_bspline.py) where the knot vector construction, the injected signal, etc., differ considerably from the MATLAB version. Therefore, the adaptive spline regression results from the Python version should be considered as purely illustrative and should not be directly compared to the MATLAB results (or the examples in the book associated with the MATLAB code).
+
 ## Completed Deliverables
 
 ### 1. Core PSO Engine (`pso.py`)
