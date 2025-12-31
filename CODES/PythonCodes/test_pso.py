@@ -200,7 +200,7 @@ def test_pso_2d():
 
 
 def test_pso_rand_file():
-    """Test PSO using random numbers loaded from a file."""
+    """Test PSO using random numbers written out and loaded from a file."""
     print("\n" + "="*60)
     print("Testing PSO with random numbers from file")
     print("="*60)
@@ -237,10 +237,27 @@ def test_pso_rand_file():
 
 
 def test_pso_rand_file_test3():
-    """Use existing random_numbers.txt with Test 3 PSO params."""
+    """Use user-provided random_numbers.txt with Test 3 PSO params."""
     print("\n" + "="*60)
     print("Test 3b: PSO with rand_file and overridden params")
     print("="*60)
+
+    # Check if random_numbers.txt exists
+    rand_file_path = Path(__file__).parent / "random_numbers.txt"
+    if not rand_file_path.exists():
+        print(f"\n⚠ Test aborted: {rand_file_path} not found")
+        print("\nTo generate the same random numbers as the MATLAB codes,")
+        print("run the following MATLAB code in ../MatlabCodes:")
+        print("(This is for 30,000 iterations with pop_size=40 and n_dim=20)")
+        print("\n" + "="*60)
+        print("MATLAB code:")
+        print("="*60)
+        matlab_code = """rng('default')
+x = rand(30000*40*20*2+40*20*2,1);
+save('../PythonCodes/random_numbers.txt','x','-ascii');"""
+        print(matlab_code)
+        print("="*60)
+        return
 
     # Problem setup matching Test 3
     n_dim = 20
@@ -262,7 +279,6 @@ def test_pso_rand_file_test3():
     }
 
     # Use the pre-existing random_numbers.txt in the same folder
-    rand_file_path = Path(__file__).parent / "random_numbers.txt"
     print(f"Using random file: {rand_file_path}")
 
     # Run PSO with file-backed random numbers
