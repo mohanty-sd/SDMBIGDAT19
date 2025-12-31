@@ -40,12 +40,6 @@ def test_quadratic_chirp_pso():
     print(f"Generated data with {n_samples} samples")
     print(f"Signal SNR: {signal_snr}")
     
-    # Save synthetic data to file for cross-checking in MATLAB
-    data_filename = 'test_qc_synthetic_data.txt'
-    np.savetxt(data_filename, data, fmt='%.10e')
-    print(f"\nSynthetic data saved to: {data_filename}")
-    print(f"This file can be used in ../MatlabCodes for cross-checking with MATLAB code.")
-    
     # Setup PSO parameters
     in_params = {
         'dataY': data,
