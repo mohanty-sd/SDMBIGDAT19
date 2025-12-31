@@ -6,3 +6,4 @@ __pycache__/
 *.jpg
 *.jpeg
 CODES/PythonCodes/.vscode/launch.json
+*.png
