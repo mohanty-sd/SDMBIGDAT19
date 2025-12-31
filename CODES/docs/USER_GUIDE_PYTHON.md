@@ -102,14 +102,16 @@ The Python code follows a modular structure with descriptive names:
 
 **Function Signature**:
 ```python
-def pso(fitfunc, n_dim, pso_params=None, output_level=0, seed_matrix=None):
+def pso(fitfunc, n_dim, pso_params=None, output_level=0, seed_matrix=None, rand_file=""):
     """
     Args:
         fitfunc: Fitness function that takes standardized coordinates and params
         n_dim: Dimensionality of search space
         pso_params: Optional dict of PSO parameters
         output_level: 0 (basic), 1 (+history), 2 (+locations)
-        seed_matrix: Optional initial particle locations
+        seed_matrix: Optional initial particle locations (standardized coords)
+        rand_file: Optional path to text file with random numbers [0,1)
+                  When provided, PSO uses these values instead of np.random
     
     Returns:
         Dict with 'best_location', 'best_fitness', 'total_func_evals',
@@ -136,12 +138,39 @@ pso_params = {
 **Output Dictionary**:
 ```python
 result = {
-    'best_location': np.ndarray,     # Best location (standardized coords)
+    'best_location': np.ndarray,     # Best location (real coordinates)
     'best_fitness': float,           # Best fitness value
     'total_func_evals': int,         # Total fitness evaluations
-    'all_best_fit': np.ndarray,      # (if output_level >= 1) Fitness history
-    'all_best_loc': np.ndarray       # (if output_level >= 2) Location history
+    'all_best_fit': np.ndarray,      # (if output_level >= 1) Fitness history per iteration
+    'all_best_loc': np.ndarray       # (if output_level >= 2) Best location per iteration
 }
+```
+
+### `get_default_pso_params` - Default PSO Settings
+
+**Purpose**: Retrieve the default PSO parameter dictionary.
+
+**Function Signature**:
+```python
+def get_default_pso_params() -> Dict[str, Any]:
+    """
+    Returns:
+        Dictionary with default PSO parameters
+    """
+```
+
+**Usage Example**:
+```python
+from pso import get_default_pso_params
+
+# Get defaults
+defaults = get_default_pso_params()
+print(defaults)  # Shows all default settings
+
+# Modify just one parameter
+params = get_default_pso_params()
+params['max_steps'] = 5000
+result = pso(fit_func, n_dim, params)
 ```
 
 ### 2. Helper Functions
@@ -274,9 +303,10 @@ def cardinal_bspline_fit(data_x, data_y, n_int_brks):
 
 ### `test_pso.py`
 Tests the core PSO engine on the Rastrigin benchmark function.
-- Demonstrates default and custom PSO parameters
+- Demonstrates default and custom PSO parameters (via `get_default_pso_params()`)
 - Shows convergence plots
 - Includes 2D trajectory visualization
+- **Note**: Includes `test_pso_rand_file_test3()` which requires `random_numbers.txt` file. If this file is missing, the test will abort gracefully and display MATLAB code to generate it.
 
 Run:
 ```bash
@@ -285,10 +315,10 @@ python test_pso.py
 
 ### `test_quadratic_chirp_pso.py`
 Tests quadratic chirp signal regression.
-- Generates synthetic chirp data
-- Runs multiple PSO optimizations
+- Generates synthetic chirp data and saves to `test_qc_synthetic_data.txt` for cross-checking with MATLAB
+- Runs multiple PSO optimizations (8 independent runs)
 - Compares estimated vs true signal
-- Visualizes results
+- Visualizes results and residuals
 
 Run:
 ```bash
@@ -402,22 +432,7 @@ Override default parameters for specific problems:
 ```python
 # High-dimensional problem - increase iterations
 pso_params = {
-    'max_steps': 5000,
-    'pop_size': 80
-}
-
-# Fast convergence - aggressive parameters
-pso_params = {
-    'max_velocity': 0.9,
-    'start_inertia': 0.95,
-    'end_inertia': 0.3
-}
-
-# Exploration emphasis - larger neighborhood
-pso_params = {
-    'nbrhd_sz': 5,
-    'c1': 2.5,
-    'c2': 1.5
+    'max_steps': 5000
 }
 
 result = pso(fit_func, n_dim, pso_params)
@@ -466,6 +481,22 @@ seed_matrix = np.array([
 result = pso(fit_func, n_dim=3, seed_matrix=seed_matrix)
 ```
 
+### Using File-Based Random Numbers (MATLAB Cross-Validation)
+
+For reproducibility and cross-validation with MATLAB implementations, PSO can use random numbers from a file instead of NumPy's generator:
+
+```python
+# Generate random numbers in MATLAB using:
+# rng('default')
+# x = rand(30000*40*20*2+40*20*2,1);
+# save('../PythonCodes/random_numbers.txt','x','-ascii');
+
+# Then use in Python:
+result = pso(fit_func, n_dim=20, rand_file='random_numbers.txt')
+```
+
+This allows the Python PSO to consume the exact same random sequence as the MATLAB version for numerical comparison.
+
 ## Troubleshooting
 
 ### Common Issues
@@ -479,21 +510,6 @@ ModuleNotFoundError: No module named 'numpy'
 pip install -r requirements.txt
 ```
 
-**2. Slow Convergence**
-**Solution**: Increase iterations or adjust PSO parameters:
-```python
-pso_params = {'max_steps': 5000, 'max_velocity': 0.7}
-```
-
-**3. Poor Results with B-splines**
-**Solution**: 
-- Increase number of PSO runs for better stochastic reliability
-- Adjust number of breakpoints (`nBrks`)
-- Check if data has sufficient samples relative to knots
-
-**4. Memory Issues with Large Datasets**
-**Solution**: Reduce `pop_size` or downsample data if appropriate
-
 ### Debugging Tips
 
 1. **Check fitness function**: Test on known inputs first
@@ -503,11 +519,9 @@ pso_params = {'max_steps': 5000, 'max_velocity': 0.7}
 
 ## References
 
-1. Kennedy, J., & Eberhart, R. (1995). Particle swarm optimization. *Proceedings of ICNN'95 - International Conference on Neural Networks*, 4, 1942-1948.
+1. Kennedy, J., & Eberhart, R. (1995). Particle swarm optimization. *Proceedings of the IEEE International Conference on Neural Networks (ICNN’95)*, 4, 1942–1948.
 
 2. Mohanty, S. D. (2021). *Swarm Intelligence Methods for Statistical Regression*. Chapman and Hall/CRC.
-
-3. Menold, P. H., Pearson, R. K., & Allgöwer, F. (1997). Online outlier detection and removal. *Proceedings of the 7th Mediterranean Conference on Control and Automation*, 1110-1133.
 
 ## Additional Resources
 
